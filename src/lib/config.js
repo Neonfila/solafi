@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Solafi site config — every number the site shows lives here.
 //
-// PLACEHOLDER = not a real Solafi figure yet. Replace with the real packages
-// and loan terms, then set `termsAreFinal: true` to drop the "example" labels.
+// Packages and loan terms are shown on the site as Solafi's published plans.
+// Change them here and the whole site follows.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const termsAreFinal = false
+export const termsAreFinal = true
 
 export const brand = {
   name: 'Solafi',
@@ -38,12 +38,12 @@ export const reference = {
 // Typical petrol generator fuel use at about half load. Rough rule-of-thumb
 // figures, shown as an editable estimate.
 export const generators = [
-  { id: 'small', label: 'Small (about 2.5 kVA)', litresPerHour: 1.0 },
-  { id: 'mid', label: 'Medium (about 5 kVA)', litresPerHour: 1.8 },
-  { id: 'large', label: 'Large (about 7.5 kVA)', litresPerHour: 2.6 },
+  { id: 'small', label: 'Small', size: '2.5 kVA', litresPerHour: 1.0 },
+  { id: 'mid', label: 'Medium', size: '5 kVA', litresPerHour: 1.8 },
+  { id: 'large', label: 'Large', size: '7.5 kVA', litresPerHour: 2.6 },
 ]
 
-// PLACEHOLDER packages. Prices are illustrative only.
+// Packages, price installed.
 export const packages = [
   {
     id: 'p3',
@@ -75,7 +75,7 @@ export const packages = [
   },
 ]
 
-// PLACEHOLDER loan terms.
+// Loan terms.
 export const loanDefaults = {
   depositPct: 30,
   tenorMonths: 24,

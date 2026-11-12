@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronDown, Info } from 'lucide-react'
+import { ArrowDown, ArrowRight, ChevronDown, Info } from 'lucide-react'
 import SavingsChart from './SavingsChart.jsx'
 import { generatorMonthly, project, naira, nairaShort, monthsLabel } from '../lib/calc.js'
 import { calcDefaults, generators, loanDefaults, packages, reference, termsAreFinal } from '../lib/config.js'
@@ -98,13 +98,29 @@ export default function Calculator({ onEstimate }) {
     })
   }, [onEstimate, pkg, current, r.monthlyDuringLoan])
 
+  // Phones: inputs and result do not fit on one screen, so a small bar keeps
+  // the live result in view while the inputs are being edited.
+  const inputsRef = useRef(null)
+  const resultRef = useRef(null)
+  const [dock, setDock] = useState(false)
+  useEffect(() => {
+    const seen = { inputs: false, result: false }
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) seen[e.target === inputsRef.current ? 'inputs' : 'result'] = e.isIntersecting
+      setDock(seen.inputs && !seen.result)
+    }, { rootMargin: '-25% 0px -90px 0px' })
+    io.observe(inputsRef.current)
+    io.observe(resultRef.current)
+    return () => io.disconnect()
+  }, [])
+
   const barMax = Math.max(current, r.monthlyDuringLoan, 1)
   const diff = r.monthlyDiffDuringLoan
   const kwh = Math.round(gridBill / reference.bandATariff)
 
   return (
     <div className="calc">
-      <div className="calc-inputs">
+      <div className="calc-inputs" ref={inputsRef}>
         <fieldset>
           <legend><span className="step-n">1</span> What you spend now</legend>
           <MoneyField
@@ -115,10 +131,11 @@ export default function Calculator({ onEstimate }) {
           <NumField label="Generator hours per day" value={hours} onChange={setHours} max={24} step={0.5} unit="hrs" />
           <div className="field">
             <span className="field-label">Generator size</span>
-            <div className="seg" role="radiogroup" aria-label="Generator size">
+            <div className="seg seg--stack" role="radiogroup" aria-label="Generator size">
               {generators.map((g) => (
                 <button key={g.id} type="button" role="radio" aria-checked={genId === g.id} className={genId === g.id ? 'on' : ''} onClick={() => pickGen(g.id)}>
-                  {g.label}
+                  <strong>{g.label}</strong>
+                  <span>{g.size}</span>
                 </button>
               ))}
             </div>
@@ -127,7 +144,7 @@ export default function Calculator({ onEstimate }) {
             <NumField label="Fuel use" value={lph} onChange={setLph} min={0} max={10} step={0.1} unit="L/hr" hint="Rough estimate. Change it if you know yours." />
             <MoneyField label="Petrol per litre" value={petrol} onChange={setPetrol} hint={reference.petrolNote} />
           </div>
-          <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} hint="Oil, plugs, repairs. Example figure." />
+          <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} hint="Oil, plugs, repairs." />
         </fieldset>
 
         <fieldset>
@@ -172,7 +189,7 @@ export default function Calculator({ onEstimate }) {
         </fieldset>
       </div>
 
-      <div className="calc-result" aria-live="polite">
+      <div className="calc-result" aria-live="polite" ref={resultRef}>
         <p className="eyebrow">Your estimate</p>
         <div className="bars">
           <div className="bar">
@@ -223,6 +240,19 @@ export default function Calculator({ onEstimate }) {
           Your DisCo and band may differ.
         </p>
       </div>
+
+      <button
+        type="button"
+        className={`calc-dock${dock ? ' show' : ''}`}
+        tabIndex={dock ? 0 : -1}
+        aria-hidden={!dock}
+        onClick={() => resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+      >
+        <span><small>Now</small><b className="now">{nairaShort(current)}</b></span>
+        <span><small>With Solafi</small><b className="then">{nairaShort(r.monthlyDuringLoan)}</b></span>
+        <span><small>Saved in {years} yrs</small><b className={r.savings >= 0 ? 'good' : 'bad'}>{nairaShort(r.savings)}</b></span>
+        <i><ArrowDown size={18} /></i>
+      </button>
     </div>
   )
 }

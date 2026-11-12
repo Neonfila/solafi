@@ -4,8 +4,8 @@ import { ArrowRight, BatteryCharging, CalendarCheck, ClipboardList, Fuel, Plus, 
 import StreetScene from '../components/StreetScene.jsx'
 import Calculator from '../components/Calculator.jsx'
 import Waitlist from '../components/Waitlist.jsx'
-import { naira } from '../lib/calc.js'
-import { packages, reference, termsAreFinal } from '../lib/config.js'
+import { naira, nairaShort, monthlyPayment } from '../lib/calc.js'
+import { loanDefaults, packages, reference } from '../lib/config.js'
 
 const steps = [
   { icon: ClipboardList, title: 'Tell us what you run', body: 'Share your NEPA bill, your generator habits and what you need to power. We match you to a system size.' },
@@ -26,7 +26,7 @@ const faqs = [
   { q: 'Is the calculator result a quote?', a: 'No. It is an estimate built from the numbers you enter and the plan terms shown, which you can edit. Your real quote comes after we look at what you need to power.' },
   { q: 'What can a 5 kW system with battery run?', a: 'Typically the everyday load of a family home: lights, fans, TV, fridge and freezer, laptops, Wi-Fi and a pumping machine, with room for an inverter air conditioner. What it can run and for how long depends on your appliances, so we size it with you.' },
   { q: 'Do I still need NEPA?', a: 'You can keep your grid connection as a backup and for heavy loads. Most people simply use far less of it, and stop depending on the generator.' },
-  { q: 'How much do I pay to start, and for how long?', a: 'You pay a deposit, then monthly payments over an agreed period. The deposit and period in the calculator are examples; your exact terms are confirmed in your quote.' },
+  { q: 'How much do I pay to start, and for how long?', a: `You pay a ${loanDefaults.depositPct}% deposit to start, then a fixed payment every month for ${loanDefaults.tenorMonths} months. The calculator shows the exact amounts for each system.` },
   { q: 'Where is Solafi available?', a: 'We are opening area by area. Join the waitlist with your city and we will tell you when we reach you.' },
 ]
 
@@ -115,7 +115,7 @@ export default function Home() {
         <div className="wrap">
           <p className="eyebrow">Packages</p>
           <h2>A system for the way you live.</h2>
-          {!termsAreFinal && <p className="section-lede">Sizes are set. Prices shown are examples until Solafi publishes its plans.</p>}
+          <p className="section-lede">{loanDefaults.depositPct}% deposit to start, then {loanDefaults.tenorMonths} fixed monthly payments. Installation included.</p>
           <div className="packages">
             {packages.map((p) => (
               <article key={p.id} className={`package${p.featured ? ' package--featured' : ''}`}>
@@ -127,7 +127,8 @@ export default function Home() {
                   {p.runs.map((r) => <li key={r}><Zap size={14} /> {r}</li>)}
                 </ul>
                 <p className="package-price">
-                  {termsAreFinal ? 'From' : 'Example price'} <strong>{naira(p.price)}</strong>
+                  <strong>{naira(monthlyPayment(p.price * (1 - loanDefaults.depositPct / 100), loanDefaults.monthlyRatePct, loanDefaults.tenorMonths))}<small>/month</small></strong>
+                  for {loanDefaults.tenorMonths} months after a {nairaShort(p.price * loanDefaults.depositPct / 100)} deposit. {naira(p.price)} installed.
                 </p>
                 <Link to="/#calculator" className="btn btn--ghost btn--block">Work out my payment</Link>
               </article>
