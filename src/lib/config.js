@@ -17,7 +17,7 @@ export const brand = {
 
 // Where the waitlist form sends sign-ups: the Google Apps Script web app URL
 // (see tools/waitlist-apps-script.gs). Empty = preview mode, nothing is sent.
-export const waitlistEndpoint = ''
+export const waitlistEndpoint = 'https://script.google.com/macros/s/AKfycbyGS9V-yKAaqHk2tsIrJ7ucKlEup6rzB7lmqO08uYeCRrusEieAKAbfZUV3hGaSlqIO/exec'
 
 // Public reference prices (looked up, not invented). Update when they move.
 export const reference = {
