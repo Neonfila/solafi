@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { ArrowRight, Check } from 'lucide-react'
 import { naira } from '../lib/calc.js'
 
-// Set VITE_WAITLIST_ENDPOINT to a form backend URL that accepts a JSON POST.
-// Without it the form runs in preview mode and sends nothing.
-const ENDPOINT = import.meta.env.VITE_WAITLIST_ENDPOINT
+import { waitlistEndpoint } from '../lib/config.js'
+
+// Sign-ups go to the Google Sheet script at this URL. Without one the form
+// runs in preview mode and sends nothing.
+const ENDPOINT = import.meta.env.VITE_WAITLIST_ENDPOINT || waitlistEndpoint
 
 export default function Waitlist({ estimate }) {
   const [state, setState] = useState('idle') // idle | sending | done | preview | error
@@ -23,10 +25,12 @@ export default function Waitlist({ estimate }) {
     try {
       const res = await fetch(ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        // text/plain keeps this a simple request, which Apps Script accepts cross-site
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data),
       })
-      setState(res.ok ? 'done' : 'error')
+      const out = await res.json().catch(() => null)
+      setState(res.ok && out?.ok ? 'done' : 'error')
     } catch {
       setState('error')
     }
@@ -50,6 +54,7 @@ export default function Waitlist({ estimate }) {
           <button key={k} type="button" role="radio" aria-checked={kind === k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>{k}</button>
         ))}
       </div>
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hp" />
       <label>
         <span>Full name</span>
         <input name="name" required autoComplete="name" placeholder="Your name" />

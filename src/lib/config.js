@@ -15,6 +15,10 @@ export const brand = {
   whatsapp: null,
 }
 
+// Where the waitlist form sends sign-ups: the Google Apps Script web app URL
+// (see tools/waitlist-apps-script.gs). Empty = preview mode, nothing is sent.
+export const waitlistEndpoint = ''
+
 // Public reference prices (looked up, not invented). Update when they move.
 export const reference = {
   petrolPerLitre: 1360,

@@ -346,6 +346,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .waitlist-form input { height: 50px; padding: 0 0.95rem; border-radius: 12px; background: var(--ink-2); border: 1px solid var(--line-2); outline: 0; width: 100%; }
 .waitlist-form input:focus { border-color: var(--sun); }
 .waitlist-form input::placeholder { color: #5E7268; }
+.waitlist-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .seg--wide button { padding: 0.7rem; font-size: 0.95rem; }
 .estimate-chip { font-size: 0.85rem; color: var(--leaf); background: rgba(124, 242, 154, 0.08); border: 1px solid rgba(124, 242, 154, 0.22); border-radius: 12px; padding: 0.7rem 0.9rem; line-height: 1.45; }
 .form-error { color: var(--coral); font-size: 0.9rem; }
