@@ -51,31 +51,25 @@ export const generators = [
 export const packages = [
   {
     id: 'p3',
-    name: 'Starter',
     kw: 3,
     batteryKwh: 5,
     price: 2500000,
     fits: 'Flat or small home',
-    runs: ['Lights and fans', 'TV and decoder', 'Fridge', 'Laptops and Wi-Fi'],
   },
   {
     id: 'p5',
-    name: 'Family',
     kw: 5,
     batteryKwh: 10,
     price: 4500000,
     fits: 'Family home or small office',
     featured: true,
-    runs: ['Everything in Starter', 'Freezer', 'One 1 hp inverter AC', 'Pumping machine'],
   },
   {
     id: 'p10',
-    name: 'Business',
     kw: 10,
     batteryKwh: 20,
     price: 8500000,
     fits: 'Large home or business',
-    runs: ['Everything in Family', 'Several ACs', 'Shop or office equipment', 'Longer backup'],
   },
 ]
 

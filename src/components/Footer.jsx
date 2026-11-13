@@ -9,7 +9,6 @@ export default function Footer() {
       <div className="wrap footer-grid">
         <div>
           <Logo size={30} />
-          <p className="footer-tag">Solar now. Pay monthly.</p>
         </div>
         <nav className="footer-links" aria-label="Footer">
           <Link to="/#how">How it works</Link>

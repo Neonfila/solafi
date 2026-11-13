@@ -144,10 +144,7 @@ export default function StreetScene() {
       <div className="wrap scene-bar">
         <p className="scene-status" aria-live="polite">
           <span className="scene-dot" />
-          <span>
-            <strong>{grid ? 'NEPA is on' : 'NEPA has taken light'}</strong>
-            {grid ? 'The Solafi house is running on stored sunshine.' : 'Next door, generators. The Solafi house is still on, quietly.'}
-          </span>
+          <strong>{grid ? 'NEPA is on' : 'NEPA has taken light'}</strong>
         </p>
         <button type="button" className="scene-switch" onClick={toggle} aria-pressed={!grid}>
           {grid ? <ZapOff size={16} /> : <Zap size={16} />}
