@@ -38,12 +38,12 @@ export default function StreetScene() {
               <stop offset="1" stopColor="#0E2A22" />
             </linearGradient>
             <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#FFB800" stopOpacity="0.6" />
-              <stop offset="1" stopColor="#FFB800" stopOpacity="0" />
+              <stop offset="0" stopColor="#FFF0C2" stopOpacity="0.6" />
+              <stop offset="1" stopColor="#FFF0C2" stopOpacity="0" />
             </radialGradient>
             <radialGradient id="pool" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#FFCB45" stopOpacity="0.5" />
-              <stop offset="1" stopColor="#FFCB45" stopOpacity="0" />
+              <stop offset="0" stopColor="#FFF0C2" stopOpacity="0.5" />
+              <stop offset="1" stopColor="#FFF0C2" stopOpacity="0" />
             </radialGradient>
             <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stopColor="#3B6CF0" />
@@ -126,18 +126,18 @@ export default function StreetScene() {
             </g>
             <rect x="246" y="196" width="148" height={GROUND - 196} fill="#18392E" />
             {[[262, 214], [304, 214], [346, 214], [262, 262], [346, 262]].map(([x, y], i) => (
-              <rect key={i} x={x} y={y} width="30" height="32" rx="2" fill="#FFCB45" className="win-solar" />
+              <rect key={i} x={x} y={y} width="30" height="32" rx="2" fill="#FFF0C2" className="win-solar" />
             ))}
             <rect x="304" y="270" width="32" height="60" rx="2" fill="#0A1712" />
-            <circle cx="330" cy="302" r="2" fill="#FFB800" />
+            <circle cx="330" cy="302" r="2" fill="#C8F53C" />
             {/* battery feeding the house */}
             <path d="M408 286 V246 H394" className="feed" />
             <g transform="translate(398 286)">
-              <rect width="20" height="44" rx="4" fill="#0A1712" stroke="#7CF29A" strokeWidth="1.5" />
-              <rect x="4" y="6" width="12" height="7" rx="1.5" fill="#7CF29A" className="cell" />
-              <rect x="4" y="16" width="12" height="7" rx="1.5" fill="#7CF29A" />
-              <rect x="4" y="26" width="12" height="7" rx="1.5" fill="#7CF29A" />
-              <rect x="4" y="36" width="12" height="4" rx="1.5" fill="#7CF29A" />
+              <rect width="20" height="44" rx="4" fill="#0A1712" stroke="#8FE3C0" strokeWidth="1.5" />
+              <rect x="4" y="6" width="12" height="7" rx="1.5" fill="#8FE3C0" className="cell" />
+              <rect x="4" y="16" width="12" height="7" rx="1.5" fill="#8FE3C0" />
+              <rect x="4" y="26" width="12" height="7" rx="1.5" fill="#8FE3C0" />
+              <rect x="4" y="36" width="12" height="4" rx="1.5" fill="#8FE3C0" />
             </g>
           </g>
 
