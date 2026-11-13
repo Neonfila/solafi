@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import NeonMark from '../components/NeonMark.jsx'
 import { naira } from '../lib/calc.js'
 import { reference } from '../lib/config.js'
 
@@ -37,16 +36,6 @@ export default function About() {
         <div className="wrap about-split">
           <h2>Plain terms</h2>
           <ul className="about-list">{terms.map((t) => <li key={t}>{t}</li>)}</ul>
-        </div>
-      </section>
-
-      <section className="section section--tint">
-        <div className="wrap studio">
-          <NeonMark size={96} ignite title="NeonFila" />
-          <div>
-            <h2>Built by NeonFila.</h2>
-            <a className="btn btn--ghost" href="https://neonfila.com" target="_blank" rel="noreferrer">neonfila.com <ArrowRight size={18} /></a>
-          </div>
         </div>
       </section>
 

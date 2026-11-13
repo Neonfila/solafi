@@ -18,17 +18,11 @@ export default function Footer() {
           <Link to="/about">About</Link>
           <Link to="/#waitlist">Join the waitlist</Link>
         </nav>
-        <a className="neonfila-credit" href="https://neonfila.com" target="_blank" rel="noreferrer">
-          <NeonMark size={44} title="NeonFila" />
-          <span>
-            <small>A company of</small>
-            <strong>NeonFila</strong>
-          </span>
-        </a>
       </div>
       <div className="wrap footer-base">
         <span>© {new Date().getFullYear()} {brand.name} · {brand.domain}</span>
         <span>Calculator figures are estimates, not a loan offer.</span>
+        <span className="footer-credit">Website by <a href="https://neonfila.com" target="_blank" rel="noreferrer"><NeonMark size={14} glow={false} />NeonFila</a></span>
       </div>
     </footer>
   )

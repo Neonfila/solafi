@@ -1,9 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#06100C" />
+    <meta name="theme-color" content="#F6F3EA" />
+    <!-- apply a saved light/dark choice before the first paint (see src/lib/theme.js) -->
+    <script>try{var m=localStorage.getItem('solafi-mode');if(m==='dark'||m==='light')document.documentElement.dataset.theme=m}catch(e){}</script>
     <title>Solafi — Go solar now, pay monthly</title>
     <meta name="description" content="Solafi installs a complete solar system at your home or business and you pay for it monthly. Compare it with your NEPA bill and generator fuel." />
     <meta property="og:title" content="Solafi — Go solar now, pay small-small" />

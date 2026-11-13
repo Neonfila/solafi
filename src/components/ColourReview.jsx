@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Moon, Palette, Sun, X } from 'lucide-react'
+import { setMode, useMode } from '../lib/theme.js'
 
 // Design review only. Lets a reviewer flip the primary colour and light/dark
 // on the preview build without separate deploys. It is not part of the product:
 // it renders only on the /preview/ build, or locally with ?review in the address.
+// The site's own default (mint, light) lives in styles.css and index.html.
 export const showColourReview =
   import.meta.env.BASE_URL.includes('/preview/') ||
   (import.meta.env.DEV && new URLSearchParams(window.location.search).has('review'))
@@ -40,9 +42,9 @@ const options = [
 ]
 const allVars = [...new Set(options.flatMap((o) => [...Object.keys(o.dark), ...Object.keys(o.light)]))]
 
+// Colours only: light/dark itself belongs to lib/theme.js, shared with the menu switch.
 function apply(option, mode) {
   const root = document.documentElement
-  root.dataset.theme = mode
   for (const v of allVars) root.style.removeProperty(v)
   for (const [v, val] of Object.entries(option[mode])) root.style.setProperty(v, val)
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(root).getPropertyValue('--ink').trim())
@@ -67,18 +69,20 @@ export default function ColourReview() {
   const params = new URLSearchParams(window.location.search)
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState(() => {
-    const want = params.get('colour') || read('solafi-review-colour')
-    return options.find((o) => o.id === want)?.id || 'lime'
+    const want = params.get('colour') || read('solafi-colour')
+    return options.find((o) => o.id === want)?.id || 'mint'
   })
-  const [mode, setMode] = useState(() => {
-    const want = params.get('mode') || read('solafi-review-mode')
-    return want === 'light' ? 'light' : 'dark'
-  })
+  const mode = useMode()
+
+  // a review link can open straight into a mode: ?mode=dark
+  useEffect(() => {
+    const want = params.get('mode')
+    if (want === 'dark' || want === 'light') setMode(want)
+  }, [])
 
   useEffect(() => {
     apply(options.find((o) => o.id === current), mode)
-    write('solafi-review-colour', current)
-    write('solafi-review-mode', mode)
+    write('solafi-colour', current)
   }, [current, mode])
 
   return (
