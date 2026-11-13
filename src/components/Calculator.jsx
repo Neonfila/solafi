@@ -116,18 +116,13 @@ export default function Calculator({ onEstimate }) {
 
   const barMax = Math.max(current, r.monthlyDuringLoan, 1)
   const diff = r.monthlyDiffDuringLoan
-  const kwh = Math.round(gridBill / reference.bandATariff)
 
   return (
     <div className="calc">
-      <div className="calc-inputs" ref={inputsRef}>
+      <div className={`calc-inputs${showTerms ? '' : ' calc-inputs--stick'}`} ref={inputsRef}>
         <fieldset>
-          <legend><span className="step-n">1</span> What you spend now</legend>
-          <MoneyField
-            label="Monthly NEPA bill"
-            value={gridBill} onChange={setGridBill} max={400000} step={5000}
-            hint={`At Band A (₦${reference.bandATariff}/kWh) that is about ${kwh.toLocaleString('en-NG')} kWh a month.`}
-          />
+          <legend>What you spend now</legend>
+          <MoneyField label="Monthly NEPA bill" value={gridBill} onChange={setGridBill} max={400000} step={5000} />
           <NumField label="Generator hours per day" value={hours} onChange={setHours} max={24} step={0.5} unit="hrs" />
           <div className="field">
             <span className="field-label">Generator size</span>
@@ -140,15 +135,10 @@ export default function Calculator({ onEstimate }) {
               ))}
             </div>
           </div>
-          <div className="field-row">
-            <NumField label="Fuel use" value={lph} onChange={setLph} min={0} max={10} step={0.1} unit="L/hr" hint="Rough estimate. Change it if you know yours." />
-            <MoneyField label="Petrol per litre" value={petrol} onChange={setPetrol} hint={reference.petrolNote} />
-          </div>
-          <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} hint="Oil, plugs, repairs." />
         </fieldset>
 
         <fieldset>
-          <legend><span className="step-n">2</span> Pick a system</legend>
+          <legend>Pick a system</legend>
           <div className="pkg-pick" role="radiogroup" aria-label="System size">
             {packages.map((p) => (
               <button key={p.id} type="button" role="radio" aria-checked={pkgId === p.id} className={pkgId === p.id ? 'on' : ''} onClick={() => pickPkg(p.id)}>
@@ -157,17 +147,21 @@ export default function Calculator({ onEstimate }) {
               </button>
             ))}
           </div>
-          <NumField label="Years to compare" value={years} onChange={setYears} min={1} max={15} step={1} unit="yrs" />
 
           <button type="button" className="terms-toggle" aria-expanded={showTerms} onClick={() => setShowTerms(!showTerms)}>
             <span>
-              {termsAreFinal ? 'Plan terms' : 'Example plan terms'}
-              <em>{naira(price)} · {depositPct}% deposit · {tenor} months · {rate}%/month</em>
+              Adjust the details
+              <em>{depositPct}% deposit · {tenor} months · petrol {naira(petrol)}/litre</em>
             </span>
             <ChevronDown size={18} className={showTerms ? 'flip' : ''} />
           </button>
           {showTerms && (
             <div className="terms">
+              <div className="field-row">
+                <NumField label="Generator fuel use" value={lph} onChange={setLph} min={0} max={10} step={0.1} unit="L/hr" />
+                <MoneyField label="Petrol per litre" value={petrol} onChange={setPetrol} />
+              </div>
+              <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} />
               <MoneyField label="System price, installed" value={price} onChange={setPrice} max={20000000} step={50000} />
               <div className="field-row">
                 <NumField label="Deposit" value={depositPct} onChange={setDepositPct} max={90} step={5} unit="%" />
@@ -177,20 +171,22 @@ export default function Calculator({ onEstimate }) {
                 <NumField label="Interest per month" value={rate} onChange={setRate} max={10} step={0.1} unit="%" />
                 <NumField label="Spend solar replaces" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
               </div>
-              <NumField label="Yearly rise in fuel and tariffs" value={escalation} onChange={setEscalation} max={50} step={1} unit="%" hint="Left at 0% so the result is not flattered. Raise it if you expect prices to keep climbing." />
+              <div className="field-row">
+                <NumField label="Yearly price rise" value={escalation} onChange={setEscalation} max={50} step={1} unit="%" />
+                <NumField label="Years to compare" value={years} onChange={setYears} min={1} max={15} step={1} unit="yrs" />
+              </div>
             </div>
           )}
           {!termsAreFinal && (
             <p className="assumption">
               <Info size={15} />
-              Prices and loan terms here are placeholders while Solafi finalises its plans. Edit any of them. This is an estimate, not a quote.
+              Prices and loan terms here are placeholders while Solafi finalises its plans. This is an estimate, not a quote.
             </p>
           )}
         </fieldset>
       </div>
 
       <div className="calc-result" aria-live="polite" ref={resultRef}>
-        <p className="eyebrow">Your estimate</p>
         <div className="bars">
           <div className="bar">
             <div className="bar-head"><span>You pay now</span><strong>{naira(current)}<small>/month</small></strong></div>
@@ -214,20 +210,14 @@ export default function Calculator({ onEstimate }) {
             : <>You pay <strong>{naira(-diff)} more</strong> a month while repaying, then <strong>{naira(current - r.monthlyAfterLoan)} less</strong> a month after.</>}
         </div>
 
-        <div className="tiles">
-          <div className="tile">
-            <span>{r.savings >= 0 ? `Saved over ${years} years` : `Extra cost over ${years} years`}</span>
-            <strong className={r.savings >= 0 ? 'good' : 'bad'}>{nairaShort(Math.abs(r.savings))}</strong>
-          </div>
-          <div className="tile">
-            <span>Pays for itself in</span>
-            <strong>{r.breakEvenMonth ? monthsLabel(r.breakEvenMonth) : `Over ${years} yrs`}</strong>
-          </div>
-          <div className="tile">
-            <span>Deposit to start</span>
-            <strong>{nairaShort(r.deposit)}</strong>
-          </div>
+        <div className="saved">
+          <span>{r.savings >= 0 ? `Saved over ${years} years` : `Extra cost over ${years} years`}</span>
+          <strong className={r.savings >= 0 ? 'good' : 'bad'}>{nairaShort(Math.abs(r.savings))}</strong>
         </div>
+        <dl className="sums">
+          <div><dt>Pays for itself in</dt><dd>{r.breakEvenMonth ? monthsLabel(r.breakEvenMonth) : `Over ${years} yrs`}</dd></div>
+          <div><dt>Deposit to start</dt><dd>{nairaShort(r.deposit)}</dd></div>
+        </dl>
 
         <SavingsChart series={r.series} tenorMonths={tenor} breakEvenMonth={r.breakEvenMonth} />
 
@@ -236,8 +226,6 @@ export default function Calculator({ onEstimate }) {
         </Link>
         <p className="sources">
           Petrol: {reference.petrolNote} (<a href={reference.petrolSource.url} target="_blank" rel="noreferrer">{reference.petrolSource.label}</a>).
-          Tariff: {reference.bandANote} (<a href={reference.bandASource.url} target="_blank" rel="noreferrer">{reference.bandASource.label}</a>).
-          Your DisCo and band may differ.
         </p>
       </div>
 

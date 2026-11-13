@@ -16,7 +16,7 @@ export default function SavingsChart({ series, tenorMonths, breakEvenMonth }) {
   }, [])
 
   const h = w < 420 ? 220 : 260
-  const pad = { l: 46, r: 12, t: 14, b: 28 }
+  const pad = { l: 46, r: 22, t: 14, b: 28 }
   const months = series.length - 1
   const last = series[months]
   const max = Math.max(last.current, last.solar, 1)

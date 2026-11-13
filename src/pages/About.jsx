@@ -10,7 +10,7 @@ export default function About() {
       <section className="page-hero">
         <div className="wrap narrow">
           <p className="eyebrow">About Solafi</p>
-          <h1>The sun is free. <span className="sun-text">Getting it onto your roof should not take your savings.</span></h1>
+          <h1><span className="sun-text">The sun is free.</span> Getting it onto your roof should not take your savings.</h1>
           <p className="lede">
             Solafi is a solar financing company. We install the system, you pay for it monthly,
             and the money you were already burning on power starts buying you something you keep.
