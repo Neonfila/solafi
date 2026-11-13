@@ -32,6 +32,21 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE: /solafi/
+      # Design review: the new-look branch is published at /solafi/preview/ so it
+      # can be shared without changing the live site. Remove these two steps when
+      # the branch is merged or dropped.
+      - uses: actions/checkout@v4
+        with:
+          ref: new-look
+          path: preview-src
+      - name: Build the design preview
+        working-directory: preview-src
+        run: |
+          npm ci
+          npm run build
+          mv dist ../dist/preview
+        env:
+          VITE_BASE: /solafi/preview/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
