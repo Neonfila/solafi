@@ -4,6 +4,7 @@ import Nav from './components/Nav.jsx'
 import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import About from './pages/About.jsx'
+import ColourReview, { showColourReview } from './components/ColourReview.jsx'
 
 // Scroll to the #section in the URL after a route change, or to the top.
 function ScrollManager() {
@@ -34,6 +35,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      {showColourReview && <ColourReview />}
     </>
   )
 }
