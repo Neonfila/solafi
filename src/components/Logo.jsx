@@ -6,7 +6,7 @@ export function SolafiMark({ size = 28 }) {
         <path d="M32 5v8M10 18l6 6M54 18l-6 6" />
       </g>
       <path d="M15 44a17 17 0 0 1 34 0z" style={{ fill: 'var(--sun)' }} />
-      <path d="M8 54h48" stroke="#8FE3C0" strokeWidth="5" strokeLinecap="round" />
+      <path d="M8 54h48" style={{ stroke: 'var(--leaf)' }} strokeWidth="5" strokeLinecap="round" />
     </svg>
   )
 }
