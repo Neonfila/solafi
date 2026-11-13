@@ -25,7 +25,8 @@ const blocks = [
 const generators = { 4: 900, 6: 1350, 1: 1900, 8: 1650 }
 
 const HOUSE = { x: 432, w: 136, top: GROUND - 140, peak: GROUND - 196 }
-const houseWindows = [[452, 196], [490, 196], [528, 196], [452, 240], [528, 240]]
+const BATTERY = { x: 542, y: 272 }
+const houseWindows =[[452, 196], [490, 196], [528, 196], [452, 240], [528, 240]]
 
 // two poles and the sagging line between them
 const POLES = [338, 664]
@@ -119,13 +120,24 @@ export default function StreetScene() {
 
           <g className="house">
             <path d={`M${HOUSE.x - 10} ${HOUSE.top} L${HOUSE.x + HOUSE.w / 2} ${HOUSE.peak} L${HOUSE.x + HOUSE.w + 10} ${HOUSE.top} Z`} className="house-roof" />
-            {/* the panel, seen edge-on, lying on the right slope of the roof */}
-            <path d={`M516 ${HOUSE.peak + 15} L556 ${HOUSE.peak + 44}`} className="panel" />
+            {/* the panel, lying on the right slope of the roof */}
+            <g transform={`translate(508 ${HOUSE.peak + 10}) skewY(35.7)`}>
+              <rect width="44" height="12" className="panel" />
+              <path d="M11 0v12M22 0v12M33 0v12M0 6h44" className="panel-grid" />
+            </g>
             <rect x={HOUSE.x} y={HOUSE.top} width={HOUSE.w} height={GROUND - HOUSE.top} className="house-wall" />
             {houseWindows.map(([x, y]) => (
               <rect key={`${x}-${y}`} x={x} y={y} width="20" height="24" rx="2" className="win-solar" />
             ))}
             <rect x="488" y={GROUND - 60} width="24" height="60" rx="2" className="house-door" />
+            {/* panel to battery: power runs down while the sun charges it */}
+            <path d={`M553 ${HOUSE.top - 4} V${BATTERY.y}`} className="cable" />
+            <path d={`M553 ${HOUSE.top - 4} V${BATTERY.y}`} className="cable-flow" />
+            {/* the battery on the wall; while NEPA is off it runs the house and its charge goes down */}
+            <rect x={BATTERY.x} y={BATTERY.y} width="22" height="42" rx="4" className="battery" />
+            {[0, 1, 2, 3].map((i) => (
+              <rect key={i} x={BATTERY.x + 4} y={BATTERY.y + 6 + i * 9} width="14" height="6" rx="1.5" className={`cell cell--${i}`} />
+            ))}
           </g>
 
           {/* the street's power line, in front of everything */}
