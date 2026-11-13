@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Plus } from 'lucide-react'
 import StreetScene from '../components/StreetScene.jsx'
 import Calculator from '../components/Calculator.jsx'
+import PayTimeline from '../components/PayTimeline.jsx'
 import Waitlist from '../components/Waitlist.jsx'
 import { naira, nairaShort, monthlyPayment } from '../lib/calc.js'
 import { loanDefaults, packages } from '../lib/config.js'
 
-const steps = ['Tell us what you run', 'We install panels, inverter and battery', 'You pay monthly', 'Then it is yours']
 
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
@@ -33,14 +33,7 @@ export default function Home() {
       <section id="how" className="section">
         <div className="wrap">
           <h2>We install. You pay monthly.</h2>
-          <ol className="steps">
-            {steps.map((s, i) => (
-              <li key={s}>
-                <span className="step-num">{i + 1}</span>
-                <h3>{s}</h3>
-              </li>
-            ))}
-          </ol>
+          <PayTimeline />
         </div>
       </section>
 
@@ -85,7 +78,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="waitlist" className="section section--waitlist">
+      <section id="waitlist" className="section section--tint">
         <div className="wrap waitlist-grid">
           <h2>Join the waitlist. It is free.</h2>
           <Waitlist estimate={estimate} />
