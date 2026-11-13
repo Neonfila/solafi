@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Calculator, HandCoins, Sun, Wrench } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import NeonMark from '../components/NeonMark.jsx'
 import { naira } from '../lib/calc.js'
 import { brand, reference } from '../lib/config.js'
@@ -9,7 +9,6 @@ export default function About() {
     <>
       <section className="page-hero">
         <div className="wrap narrow">
-          <p className="eyebrow">About Solafi</p>
           <h1><span className="sun-text">The sun is free.</span> Getting it onto your roof should not take your savings.</h1>
           <p className="lede">
             Solafi is a solar financing company. We install the system, you pay for it monthly,
@@ -21,7 +20,6 @@ export default function About() {
       <section className="section">
         <div className="wrap about-split">
           <div>
-            <p className="eyebrow">The problem</p>
             <h2>Most people pay for power twice.</h2>
           </div>
           <div className="prose">
@@ -41,21 +39,17 @@ export default function About() {
 
       <section className="section section--tint">
         <div className="wrap">
-          <p className="eyebrow">What we do</p>
           <h2>Three jobs, one company.</h2>
-          <div className="reasons reasons--3">
-            <div className="reason">
-              <Wrench size={22} />
+          <div className="jobs">
+            <div>
               <h3>We engineer and install</h3>
               <p>We already have the system designs: panels, inverter and battery sized to real household and business loads, installed and tested for you.</p>
             </div>
-            <div className="reason">
-              <HandCoins size={22} />
+            <div>
               <h3>We finance it</h3>
               <p>You pay a deposit and then a fixed monthly amount over an agreed period, instead of the full cost up front.</p>
             </div>
-            <div className="reason">
-              <Calculator size={22} />
+            <div>
               <h3>We show the maths</h3>
               <p>Our calculator puts your current spend next to the monthly payment. If the numbers do not work for you, you will see that too.</p>
             </div>
@@ -66,13 +60,12 @@ export default function About() {
       <section className="section">
         <div className="wrap about-split">
           <div>
-            <p className="eyebrow">What we believe</p>
             <h2>Plain terms, in plain sight.</h2>
           </div>
           <ul className="beliefs">
-            <li><Sun size={18} /><div><strong>No hidden numbers.</strong> The price, the deposit, the monthly payment and the total you repay are stated before you agree to anything.</div></li>
-            <li><Sun size={18} /><div><strong>Right-sized systems.</strong> We would rather fit the system that matches your load than sell you the biggest one.</div></li>
-            <li><Sun size={18} /><div><strong>Ownership at the end.</strong> The plan is built so that the system is yours once it is paid for.</div></li>
+            <li><div><strong>No hidden numbers.</strong> The price, the deposit, the monthly payment and the total you repay are stated before you agree to anything.</div></li>
+            <li><div><strong>Right-sized systems.</strong> We would rather fit the system that matches your load than sell you the biggest one.</div></li>
+            <li><div><strong>Ownership at the end.</strong> The plan is built so that the system is yours once it is paid for.</div></li>
           </ul>
         </div>
       </section>
@@ -81,7 +74,6 @@ export default function About() {
         <div className="wrap studio">
           <NeonMark size={96} ignite title="NeonFila" />
           <div>
-            <p className="eyebrow">A NeonFila company</p>
             <h2>Built inside the NeonFila studio.</h2>
             <p className="section-lede">
               NeonFila is a studio that builds and runs its own products. {brand.name} is the studio's energy company:

@@ -28,9 +28,9 @@ export default function Home() {
   return (
     <>
       <section className="hero">
-        <div className="wrap hero-grid">
-          <div className="hero-copy">
-            <h1>Go solar now.<br /><span className="sun-text">Pay small‑small.</span></h1>
+        <div className="wrap hero-head">
+          <h1>Go solar now.<br /><span className="sun-text">Pay small‑small.</span></h1>
+          <div className="hero-side">
             <p className="lede">
               Solafi installs a complete solar system at your home or business. You pay for it monthly,
               with the money you already spend on NEPA and generator fuel.
@@ -40,13 +40,12 @@ export default function Home() {
               <Link to="/#waitlist" className="btn btn--ghost">Join the waitlist</Link>
             </div>
           </div>
-          <StreetScene />
         </div>
+        <StreetScene />
       </section>
 
       <section id="how" className="section">
         <div className="wrap">
-          <p className="eyebrow">How it works</p>
           <h2>We install. You pay monthly.</h2>
           <ol className="steps">
             {steps.map((s, i) => (
@@ -64,7 +63,6 @@ export default function Home() {
 
       <section id="calculator" className="section section--calc">
         <div className="wrap">
-          <p className="eyebrow">Savings calculator</p>
           <h2>NEPA plus generator, against Solafi.</h2>
           <Calculator onEstimate={setEstimate} />
         </div>
@@ -72,26 +70,24 @@ export default function Home() {
 
       <section id="packages" className="section">
         <div className="wrap">
-          <p className="eyebrow">Packages</p>
           <h2>A system for the way you live.</h2>
           <p className="section-lede">{loanDefaults.depositPct}% deposit to start, then {loanDefaults.tenorMonths} fixed monthly payments. Installation included.</p>
-          <div className="packages">
+          <ul className="plans">
             {packages.map((p) => (
-              <article key={p.id} className={`package${p.featured ? ' package--featured' : ''}`}>
-                {p.featured && <span className="package-flag">Most homes</span>}
-                <h3>{p.name}</h3>
-                <p className="package-size">{p.kw} kW <span>+ {p.batteryKwh} kWh battery</span></p>
-                <p className="package-fits">{p.fits}</p>
-                <ul>
-                  {p.runs.map((r) => <li key={r}>{r}</li>)}
-                </ul>
-                <p className="package-price">
+              <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
+                <p className="plan-size">{p.kw} kW<span>{p.batteryKwh} kWh battery</span></p>
+                <div className="plan-fit">
+                  <h3>{p.name}{p.featured && <em>Most homes</em>}</h3>
+                  <p>{p.fits}</p>
+                  <p className="plan-runs">{p.runs.join(' · ')}</p>
+                </div>
+                <p className="plan-price">
                   <strong>{naira(monthlyPayment(p.price * (1 - loanDefaults.depositPct / 100), loanDefaults.monthlyRatePct, loanDefaults.tenorMonths))}<small>/month</small></strong>
-                  {nairaShort(p.price * loanDefaults.depositPct / 100)} deposit · {naira(p.price)} installed
+                  <span>{nairaShort(p.price * loanDefaults.depositPct / 100)} deposit</span><span>{naira(p.price)} installed</span>
                 </p>
-              </article>
+              </li>
             ))}
-          </div>
+          </ul>
           <Link to="/#calculator" className="btn btn--ghost packages-cta">Work out my payment <ArrowRight size={18} /></Link>
         </div>
       </section>
@@ -99,7 +95,6 @@ export default function Home() {
       <section id="faq" className="section">
         <div className="wrap faq-grid">
           <div>
-            <p className="eyebrow">FAQ</p>
             <h2>Questions people ask first.</h2>
           </div>
           <div className="faq">

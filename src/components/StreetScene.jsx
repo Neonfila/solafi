@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Zap, ZapOff } from 'lucide-react'
 
-// Hero visual: a flat street at night. When the grid drops, the neighbours'
-// windows go out block by block and the house with solar stays lit.
-const GROUND = 372
+// Hero visual: one long street at night, running off both edges of the page.
+// When the grid drops, the neighbours' windows go out from left to right and
+// the Solafi house in the middle stays lit. On a phone the crop keeps the house
+// and its nearest neighbours.
+const W = 1000
+const H = 340
+const GROUND = 320
 const WIN = { w: 16, h: 20, pitch: 34, top: 20 }
+
+// [x, width, height, columns]; the gap in the middle belongs to the house
 const blocks = [
-  { x: 66, w: 110, h: 214, cols: 3, rows: 5 },
-  { x: 178, w: 70, h: 118, cols: 2, rows: 2 },
-  { x: 394, w: 76, h: 184, cols: 2, rows: 4 },
-  { x: 500, w: 100, h: 132, cols: 3, rows: 3 },
-]
-// The Solafi house sits in the middle so it survives the phone crop.
-const HOUSE = { x: 252, w: 136, top: 232, peak: 176 }
-const houseWindows = [[270, 250], [310, 250], [350, 250], [270, 300], [350, 300]]
+  [-10, 90, 170, 2], [88, 70, 230, 2], [166, 96, 140, 3], [270, 64, 196, 2], [342, 82, 118, 2],
+  [576, 84, 150, 2], [668, 66, 214, 2], [742, 100, 128, 3], [850, 72, 188, 2], [930, 90, 160, 2],
+].map(([x, w, h, cols]) => ({ x, w, h, cols, rows: Math.floor((h - 24) / WIN.pitch) }))
+
+const HOUSE = { x: 432, w: 136, top: GROUND - 140, peak: GROUND - 196 }
+const houseWindows = [[452, 196], [490, 196], [528, 196], [452, 240], [528, 240]]
 
 function windowsOf(b, bi) {
-  const pad = 16
+  const pad = 12
   const step = b.cols > 1 ? (b.w - pad * 2 - WIN.w) / (b.cols - 1) : 0
   const out = []
   for (let r = 0; r < b.rows; r++) {
@@ -51,11 +55,9 @@ export default function StreetScene() {
   return (
     <div className={`scene ${grid ? 'scene--on' : 'scene--off'}`}>
       <div className="scene-stage">
-        <svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A street at night. When the grid goes off, only the house with Solafi solar stays lit.">
-          {/* drawn at 1x, then enlarged from the kerb so the street fills the frame */}
-          <g transform={`translate(320 ${GROUND}) scale(1.32) translate(-320 ${-GROUND})`}>
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" role="img" aria-label="A street at night. When the grid goes off, only the house with Solafi solar stays lit.">
           {blocks.map((b, bi) => (
-            <g key={b.x} className="block" style={{ '--d': `${bi * 110}ms` }}>
+            <g key={b.x} style={{ '--d': `${bi * 70}ms` }}>
               <rect x={b.x} y={GROUND - b.h} width={b.w} height={b.h} className="block-wall" />
               {windowsOf(b, bi).map((w, i) => (
                 <rect key={i} x={w.x} y={w.y} width={WIN.w} height={WIN.h} rx="2" className={w.unlit ? 'win win--unlit' : 'win'} />
@@ -66,29 +68,26 @@ export default function StreetScene() {
           <g className="house">
             <path d={`M${HOUSE.x - 10} ${HOUSE.top} L${HOUSE.x + HOUSE.w / 2} ${HOUSE.peak} L${HOUSE.x + HOUSE.w + 10} ${HOUSE.top} Z`} className="house-roof" />
             {/* the panel, seen edge-on, lying on the right slope of the roof */}
-            <path d="M338 184 L386 218.5" className="panel" />
+            <path d={`M516 ${HOUSE.peak + 15} L556 ${HOUSE.peak + 44}`} className="panel" />
             <rect x={HOUSE.x} y={HOUSE.top} width={HOUSE.w} height={GROUND - HOUSE.top} className="house-wall" />
             {houseWindows.map(([x, y]) => (
               <rect key={`${x}-${y}`} x={x} y={y} width="20" height="24" rx="2" className="win-solar" />
             ))}
-            <rect x="308" y="316" width="24" height={GROUND - 316} rx="2" className="house-door" />
-          </g>
+            <rect x="488" y={GROUND - 60} width="24" height="60" rx="2" className="house-door" />
           </g>
 
-          <rect y={GROUND} width="640" height={400 - GROUND} className="ground" />
+          <rect y={GROUND} width={W} height={H - GROUND} className="ground" />
         </svg>
-
-        <div className="scene-status" aria-live="polite">
-          <span className="scene-dot" />
-          {grid ? 'NEPA is on' : 'NEPA has taken light'}
-        </div>
       </div>
 
-      <div className="scene-bar">
-        <div className="scene-tag">
-          <strong>The Solafi house</strong>
-          <span>{grid ? 'Running on stored sunshine' : 'Still on. No generator.'}</span>
-        </div>
+      <div className="wrap scene-bar">
+        <p className="scene-status" aria-live="polite">
+          <span className="scene-dot" />
+          <span>
+            <strong>{grid ? 'NEPA is on' : 'NEPA has taken light'}</strong>
+            {grid ? 'The Solafi house is running on stored sunshine.' : 'The Solafi house is still on. No generator.'}
+          </span>
+        </p>
         <button type="button" className="scene-switch" onClick={toggle} aria-pressed={!grid}>
           {grid ? <ZapOff size={16} /> : <Zap size={16} />}
           {grid ? 'Take light' : 'Bring light back'}

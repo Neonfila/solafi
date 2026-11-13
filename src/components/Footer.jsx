@@ -22,9 +22,8 @@ export default function Footer() {
         <a className="neonfila-credit" href="https://neonfila.com" target="_blank" rel="noreferrer">
           <NeonMark size={44} title="NeonFila" />
           <span>
-            <small>A</small>
+            <small>A company of</small>
             <strong>NeonFila</strong>
-            <small>company</small>
           </span>
         </a>
       </div>
