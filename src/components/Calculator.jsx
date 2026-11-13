@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowRight, ChevronDown, Info } from 'lucide-react'
+import SavingsChart from './SavingsChart.jsx'
 import { generatorMonthly, project, naira, nairaShort, monthsLabel } from '../lib/calc.js'
 import { calcDefaults, generators, loanDefaults, packages, reference, termsAreFinal } from '../lib/config.js'
 
@@ -50,6 +51,10 @@ function NumField({ label, hint, value, onChange, min = 0, max, step = 1, unit }
   )
 }
 
+// The chart looks five years ahead: far enough to show the system paying off,
+// short enough to trust.
+const CHART_YEARS = 5
+
 export default function Calculator({ onEstimate }) {
   const d = calcDefaults
   const [gridBill, setGridBill] = useState(d.gridBill)
@@ -83,8 +88,8 @@ export default function Calculator({ onEstimate }) {
   )
   const current = gridBill + gen.total
   const r = useMemo(
-    () => project({ currentMonthly: current, price, depositPct, tenorMonths: tenor, monthlyRatePct: rate, coveragePct: coverage, escalationPct: 0, years: d.years }),
-    [current, price, depositPct, tenor, rate, coverage, d.years],
+    () => project({ currentMonthly: current, price, depositPct, tenorMonths: tenor, monthlyRatePct: rate, coveragePct: coverage, escalationPct: 0, years: CHART_YEARS }),
+    [current, price, depositPct, tenor, rate, coverage],
   )
 
   useEffect(() => {
@@ -205,6 +210,16 @@ export default function Calculator({ onEstimate }) {
             <div className="bar-track"><i className="bar-fill bar-fill--after" style={{ width: `${Math.max((r.monthlyAfterLoan / barMax) * 100, 1.5)}%` }} /></div>
             <p>Only the NEPA and fuel you still use</p>
           </div>
+        </div>
+
+        <div className="five">
+          <p className="five-head">
+            {r.savings >= 0
+              ? <>Over {CHART_YEARS} years you keep <strong>{nairaShort(r.savings)}</strong></>
+              : <>Over {CHART_YEARS} years Solafi costs <strong className="more">{nairaShort(-r.savings)} more</strong></>}
+          </p>
+          <p className="five-sub">Everything you would spend, added up month by month. The shaded gap is your money.</p>
+          <SavingsChart series={r.series} tenorMonths={tenor} />
         </div>
 
         <p className="deposit-line"><span>To start</span><strong>{naira(r.deposit)} deposit</strong></p>
