@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowRight, ChevronDown, Info } from 'lucide-react'
-import SavingsChart from './SavingsChart.jsx'
 import { generatorMonthly, project, naira, nairaShort, monthsLabel } from '../lib/calc.js'
 import { calcDefaults, generators, loanDefaults, packages, reference, termsAreFinal } from '../lib/config.js'
 
@@ -66,8 +65,6 @@ export default function Calculator({ onEstimate }) {
   const [tenor, setTenor] = useState(loanDefaults.tenorMonths)
   const [rate, setRate] = useState(loanDefaults.monthlyRatePct)
   const [coverage, setCoverage] = useState(d.coveragePct)
-  const [escalation, setEscalation] = useState(d.escalationPct)
-  const [years, setYears] = useState(d.years)
   const [showTerms, setShowTerms] = useState(false)
 
   const pkg = packages.find((p) => p.id === pkgId)
@@ -86,8 +83,8 @@ export default function Calculator({ onEstimate }) {
   )
   const current = gridBill + gen.total
   const r = useMemo(
-    () => project({ currentMonthly: current, price, depositPct, tenorMonths: tenor, monthlyRatePct: rate, coveragePct: coverage, escalationPct: escalation, years }),
-    [current, price, depositPct, tenor, rate, coverage, escalation, years],
+    () => project({ currentMonthly: current, price, depositPct, tenorMonths: tenor, monthlyRatePct: rate, coveragePct: coverage, escalationPct: 0, years: d.years }),
+    [current, price, depositPct, tenor, rate, coverage, d.years],
   )
 
   useEffect(() => {
@@ -171,10 +168,6 @@ export default function Calculator({ onEstimate }) {
                 <NumField label="Interest per month" value={rate} onChange={setRate} max={10} step={0.1} unit="%" />
                 <NumField label="Spend solar replaces" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
               </div>
-              <div className="field-row">
-                <NumField label="Yearly price rise" value={escalation} onChange={setEscalation} max={50} step={1} unit="%" />
-                <NumField label="Years to compare" value={years} onChange={setYears} min={1} max={15} step={1} unit="yrs" />
-              </div>
             </div>
           )}
           {!termsAreFinal && (
@@ -187,42 +180,37 @@ export default function Calculator({ onEstimate }) {
       </div>
 
       <div className="calc-result" aria-live="polite" ref={resultRef}>
+        <div className="answer">
+          {diff >= 0
+            ? <p className="answer-main">You save <strong>{naira(diff)}</strong> every month.</p>
+            : <p className="answer-main">You pay <strong className="more">{naira(-diff)} more</strong> a month for {monthsLabel(tenor)}.</p>}
+          <p className="answer-sub">
+            Once it is paid off in {monthsLabel(tenor)}, the system is yours and you save {naira(current - r.monthlyAfterLoan)} every month.
+          </p>
+        </div>
+
         <div className="bars">
           <div className="bar">
-            <div className="bar-head"><span>You pay now</span><strong>{naira(current)}<small>/month</small></strong></div>
+            <div className="bar-head"><span>What you pay now</span><strong>{naira(current)}<small>/month</small></strong></div>
             <div className="bar-track"><i className="bar-fill bar-fill--current" style={{ width: `${(current / barMax) * 100}%` }} /></div>
             <p>NEPA {naira(gridBill)} + fuel {naira(gen.fuel)}{gen.servicing > 0 && <> + servicing {naira(gen.servicing)}</>}</p>
           </div>
           <div className="bar">
-            <div className="bar-head"><span>With Solafi, first {monthsLabel(tenor)}</span><strong>{naira(r.monthlyDuringLoan)}<small>/month</small></strong></div>
+            <div className="bar-head"><span>With Solafi, for {monthsLabel(tenor)}</span><strong>{naira(r.monthlyDuringLoan)}<small>/month</small></strong></div>
             <div className="bar-track"><i className="bar-fill bar-fill--solar" style={{ width: `${(r.monthlyDuringLoan / barMax) * 100}%` }} /></div>
-            <p>Repayment {naira(r.payment)}{r.residualNow > 0 && <> + {naira(r.residualNow)} NEPA and fuel you still use</>}</p>
+            <p>Solafi payment {naira(r.payment)}{r.residualNow > 0 && <> + {naira(r.residualNow)} NEPA and fuel you still use</>}</p>
           </div>
           <div className="bar">
-            <div className="bar-head"><span>After the loan</span><strong>{naira(r.monthlyAfterLoan)}<small>/month</small></strong></div>
+            <div className="bar-head"><span>Once it is paid off</span><strong>{naira(r.monthlyAfterLoan)}<small>/month</small></strong></div>
             <div className="bar-track"><i className="bar-fill bar-fill--after" style={{ width: `${Math.max((r.monthlyAfterLoan / barMax) * 100, 1.5)}%` }} /></div>
+            <p>Only the NEPA and fuel you still use</p>
           </div>
         </div>
 
-        <div className={`verdict ${diff >= 0 ? 'verdict--good' : 'verdict--neutral'}`}>
-          {diff >= 0
-            ? <>You pay <strong>{naira(diff)} less</strong> every month from day one.</>
-            : <>You pay <strong>{naira(-diff)} more</strong> a month while repaying, then <strong>{naira(current - r.monthlyAfterLoan)} less</strong> a month after.</>}
-        </div>
-
-        <div className="saved">
-          <span>{r.savings >= 0 ? `Saved over ${years} years` : `Extra cost over ${years} years`}</span>
-          <strong className={r.savings >= 0 ? 'good' : 'bad'}>{nairaShort(Math.abs(r.savings))}</strong>
-        </div>
-        <dl className="sums">
-          <div><dt>Pays for itself in</dt><dd>{r.breakEvenMonth ? monthsLabel(r.breakEvenMonth) : `Over ${years} yrs`}</dd></div>
-          <div><dt>Deposit to start</dt><dd>{nairaShort(r.deposit)}</dd></div>
-        </dl>
-
-        <SavingsChart series={r.series} tenorMonths={tenor} breakEvenMonth={r.breakEvenMonth} />
+        <p className="deposit-line"><span>To start</span><strong>{naira(r.deposit)} deposit</strong></p>
 
         <Link to="/#waitlist" className="btn btn--sun btn--block">
-          Join the waitlist with this estimate <ArrowRight size={18} />
+          Join the waitlist <ArrowRight size={18} />
         </Link>
         <p className="sources">
           Petrol: {reference.petrolNote} (<a href={reference.petrolSource.url} target="_blank" rel="noreferrer">{reference.petrolSource.label}</a>).
@@ -238,7 +226,7 @@ export default function Calculator({ onEstimate }) {
       >
         <span><small>Now</small><b className="now">{nairaShort(current)}</b></span>
         <span><small>With Solafi</small><b className="then">{nairaShort(r.monthlyDuringLoan)}</b></span>
-        <span><small>Saved in {years} yrs</small><b className={r.savings >= 0 ? 'good' : 'bad'}>{nairaShort(r.savings)}</b></span>
+        <span><small>{diff >= 0 ? 'You save' : 'Extra'}</small><b className={diff >= 0 ? 'good' : 'bad'}>{nairaShort(Math.abs(diff))}/mo</b></span>
         <i><ArrowDown size={18} /></i>
       </button>
     </div>
