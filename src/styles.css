@@ -85,28 +85,67 @@ h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; line-height:
 .hero .lede { font-size: clamp(1.02rem, 1.4vw, 1.15rem); }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem; }
 
-/* street scene: one street across the full width of the page */
-.scene { margin-top: clamp(2.5rem, 5vw, 4rem); }
-.scene-stage { height: clamp(260px, 30vw, 420px); background: #0A1611; }
+/* street scene: one street across the full width of the page.
+   Its colours are scene tokens: evening in the dark theme, dusk in the light one. */
+.scene {
+  --sc-sky: #0A1611; --sc-wall: #12251D; --sc-wall-off: #0E1D17;
+  --sc-win: #E9C46A; --sc-win-dip: #8E7A44; --sc-win-off: #0B1813; --sc-gen: #D98A3D;
+  --sc-roof: #214636; --sc-house: #1A3A2C; --sc-door: #0E1D17; --sc-solar: #FFF0C2;
+  --sc-ground: #06100C; --sc-wire: #2B4639; --sc-box: #22392F; --sc-lamp: #7FD8A8;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+.scene-stage { height: clamp(260px, 30vw, 420px); background: var(--sc-sky); }
 .scene-stage > svg { display: block; width: 100%; height: 100%; }
-.block-wall { fill: #12251D; transition: fill 500ms ease var(--d); }
-.scene--off .block-wall { fill: #0E1D17; }
-.win { fill: #E9C46A; transition: fill 90ms linear var(--d); }
-.win--unlit, .scene--off .win { fill: #0B1813; }
-.house-roof { fill: #214636; }
-.house-wall { fill: #1A3A2C; }
-.house-door { fill: #0E1D17; }
-.panel { fill: none; stroke: var(--sun); stroke-width: 6; stroke-linecap: round; }
-.win-solar { fill: #FFF0C2; }
-.ground { fill: #06100C; }
+.block-wall { fill: var(--sc-wall); transition: fill 600ms cubic-bezier(0.25, 0.8, 0.25, 1); }
+.scene--dark .block-wall { fill: var(--sc-wall-off); transition-delay: 300ms; }
+.win { fill: var(--sc-win); transition: fill 140ms linear; }
+.win--unlit { fill: var(--sc-win-off); }
+/* 1. the supply sags, everyone at once */
+.scene--dip .win:not(.win--unlit) { fill: var(--sc-win-dip); transition-duration: 180ms; }
+/* 2. out, travelling away from the transformer; a bulb goes in about 80ms */
+.scene--out .win, .scene--gen .win { fill: var(--sc-win-off); transition: fill 80ms linear var(--d); }
+/* 3. generators: a pull-start sputter, then a light that never quite holds steady */
+.win-gen { fill: var(--sc-gen); opacity: 0; }
+.scene--gen .win-gen { animation: gen-start 700ms linear var(--g) both, gen-hum 2.6s ease-in-out calc(var(--g) + 700ms) infinite; }
+@keyframes gen-start { 0% { opacity: 0; } 18% { opacity: 0.55; } 30% { opacity: 0.1; } 52% { opacity: 0.7; } 64% { opacity: 0.35; } 100% { opacity: 0.85; } }
+@keyframes gen-hum { 0%, 100% { opacity: 0.85; } 37% { opacity: 0.68; } 52% { opacity: 0.8; } 71% { opacity: 0.62; } }
+/* light back: each bulb catches with a blink, outward from the transformer */
+.scene--back.scene--on .win:not(.win--unlit) { animation: catch 420ms linear var(--d) both; }
+@keyframes catch { 0% { fill: var(--sc-win-off); } 14% { fill: var(--sc-win); } 26% { fill: var(--sc-win-dip); } 40%, 100% { fill: var(--sc-win); } }
+.house-roof { fill: var(--sc-roof); }
+.house-wall { fill: var(--sc-house); }
+.house-door { fill: var(--sc-door); }
+.panel { fill: none; stroke: var(--sc-panel, var(--sun)); stroke-width: 6; stroke-linecap: round; }
+.win-solar { fill: var(--sc-solar); }
+.wire { fill: none; stroke: var(--sc-wire); stroke-width: 2; }
+.pole { fill: var(--sc-wire); }
+.transformer { fill: var(--sc-box); }
+.transformer-lamp { fill: var(--sc-lamp); transition: fill 120ms linear; }
+.scene--dark .transformer-lamp { fill: var(--sc-win-off); }
+/* the one bright moment: the transformer gives out */
+.spark { fill: var(--sc-solar); opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.2); }
+.scene--out .spark { animation: spark 420ms cubic-bezier(0.25, 0.8, 0.25, 1); }
+@keyframes spark { 0% { opacity: 0; transform: scale(0.2); } 12% { opacity: 0.95; } 100% { opacity: 0; transform: scale(1.4); } }
+.ground { fill: var(--sc-ground); }
+
+:root[data-theme='light'] .scene {
+  --sc-sky: #E7DFCC; --sc-wall: #BDB39C; --sc-wall-off: #B2A890;
+  --sc-win: #F4C24F; --sc-win-dip: #D2B577; --sc-win-off: #8E8570; --sc-gen: #D9772C;
+  --sc-roof: #3C705A; --sc-house: #2E5C49; --sc-door: #1F3F33; --sc-solar: #FFE7A3;
+  --sc-ground: #6E6654; --sc-wire: #5B5444; --sc-box: #6B634F; --sc-lamp: #2E9E74; --sc-panel: #1C2B36;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene *, .scene *::before { animation: none !important; transition: none !important; }
+  .scene--gen .win-gen { opacity: 0.85; }
+}
 
 .scene-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
 .scene-status { display: flex; align-items: baseline; gap: 0.7rem; color: var(--muted); font-size: 0.95rem; line-height: 1.4; min-width: 0; }
 .scene-status strong { color: var(--cream); font-weight: 700; margin-right: 0.5rem; }
 .scene-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--leaf); transition: background 300ms; flex: none; transform: translateY(-1px); }
-.scene--off .scene-dot { background: var(--coral); }
+.scene--dark .scene-dot { background: var(--coral); }
 .scene-switch { display: flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.05rem; border-radius: 999px; background: var(--cream); color: var(--ink); font-weight: 700; font-size: 0.9rem; white-space: nowrap; transition: transform 160ms var(--ease), background 200ms; }
-.scene--off .scene-switch { background: var(--sun); }
+.scene--dark .scene-switch { background: var(--sun); }
 .scene-switch:hover { transform: translateY(-2px); }
 
 /* sections */
@@ -381,7 +420,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .review-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .review-modes button { justify-content: center; }
 
-/* light theme: same tokens, daylight values. The street scene stays at night. */
+/* light theme: same tokens, daylight values. The street scene has its own dusk tokens above. */
 :root[data-theme='light'] {
   --ink: #F6F3EA;
   --ink-2: #EDE8DB;
