@@ -10,7 +10,8 @@ function Clauses({ items }) {
 
 // The agreement itself, filled with one client's details. `signed` adds the
 // signature and the details the client entered, for the signed copy.
-const Agreement = forwardRef(function Agreement({ d, signed }, ref) {
+// `customer` shows the name and phone as the client types them.
+const Agreement = forwardRef(function Agreement({ d, signed, customer }, ref) {
   const c = clauses(d)
   const blank = (v) => (v ? <span className="ag-filled">{v}</span> : <span className="ag-fill" />)
   return (
@@ -32,7 +33,7 @@ const Agreement = forwardRef(function Agreement({ d, signed }, ref) {
           <thead><tr><th>Party Role</th><th>Legal Name / Entity</th><th>Registered / Installation Address &amp; Contact</th></tr></thead>
           <tbody>
             <tr><td className="k">1. Provider ("SOLAFI")</td><td>{PROVIDER.name}</td><td>{PROVIDER.address}  |  {PROVIDER.site}</td></tr>
-            <tr><td className="k">2. Customer ("Customer")</td><td>{blank(signed?.fullName || d.customerName)}</td><td>{d.address}  |  Tel {blank(signed?.phone || d.phone)}</td></tr>
+            <tr><td className="k">2. Customer ("Customer")</td><td>{blank(signed?.fullName || customer?.name || d.customerName)}</td><td>{d.address}  |  Tel {blank(signed?.phone || customer?.phone || d.phone)}</td></tr>
           </tbody>
         </table>
       </div>

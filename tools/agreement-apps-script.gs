@@ -1,19 +1,20 @@
-// Solafi agreements → Google Sheet + Drive.
+// Solafi agreements -> Google Sheet + Drive.
 // Lives in the Apps Script project attached to a private "Solafi agreements"
-// sheet (Extensions → Apps Script), deployed as a Web app: execute as Me,
+// sheet (Extensions -> Apps Script), deployed as a Web app: execute as Me,
 // access "Anyone". The site's signing page (/sign/#<token>) reads one row and
 // sends the signature back. Client details live only in this sheet and your
 // Drive, never in the website's code.
 //
 // Setup, once:
 //   1. Paste this file in, run setup() and allow the permissions it asks for.
-//   2. Deploy → New deployment → Web app → Execute as: Me, Access: Anyone.
+//   2. Deploy -> New deployment -> Web app -> Execute as: Me, Access: Anyone.
 //   3. Put the /exec URL in src/lib/config.js as agreementEndpoint.
 // Each client:
 //   1. Fill a row (Package is the id, e.g. 5kva-10kwh; money as plain numbers).
-//   2. Select the row → menu Solafi → Make signing link. Send the link.
-//   3. When they sign, the row turns "Signed", their files land in Drive under
-//      "Solafi agreements", and you get an email.
+//   2. Select the row -> menu Solafi -> Make signing link. Send the link.
+//   3. When they sign, the row turns "Signed", their files (the signed
+//      agreement PDF, signature, ID, bill) land in Drive under "Solafi
+//      agreements", and you get an email.
 
 // Change to the live address once the new site is on main.
 const SIGN_PAGE = 'https://neonfila.github.io/solafi/preview/sign/#';
@@ -67,7 +68,7 @@ function makeLink() {
   ui.alert('Signing link', SIGN_PAGE + token, ui.ButtonSet.OK);
 }
 
-// GET ?action=agreement&token=… → the client's agreement details.
+// GET ?action=agreement&token=... -> the client's agreement details.
 function doGet(e) {
   const found = findRow(e.parameter.token);
   if (!found) return reply({ ok: false, error: 'not found' });
@@ -76,7 +77,7 @@ function doGet(e) {
   return reply({ ok: true, agreement: out });
 }
 
-// POST {action:'sign', …} → save the signature, files and the text that was signed.
+// POST {action:'sign', ...} -> save the signature, files and the text that was signed.
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -110,16 +111,9 @@ function doPost(e) {
       const ext = (String(f.name).match(/\.[a-z0-9]{2,5}$/i) || [''])[0];
       folder.createFile(blobFrom(f.data, f.type, label + ext));
     });
-    folder.createFile('agreement.txt', [
-      'Signed by: ' + name,
-      'Phone: ' + clean(d.phone, 40),
-      'Signed at: ' + signedAt + ' (' + tz + ')',
-      'Terms version: ' + clean(d.termsVersion, 20),
-      'Text SHA-256: ' + hash,
-      'Device: ' + clean(d.userAgent, 300),
-      '',
-      String(d.text),
-    ].join('\n'), MimeType.PLAIN_TEXT);
+    folder.createFile(agreementPdf(d, {
+      name: name, signedAt: signedAt + ' (' + tz + ')', hash: hash,
+    }).setName('Agreement - ' + name + '.pdf'));
 
     const set = (k, v) => sheet.getRange(found.row, col(k)).setValue(v);
     set('status', 'Signed');
@@ -139,6 +133,54 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// The signed agreement as a PDF: the agreement exactly as the client saw it,
+// then their KYC details, their signature and a signing record.
+function agreementPdf(d, rec) {
+  const body = String(d.html || '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<svg[\s\S]*?<\/svg>/gi, '');
+  const row = (a, b, c, e) => '<tr><td class="k">' + a + '</td><td>' + esc(b) + '</td><td class="k">' + c + '</td><td>' + esc(e) + '</td></tr>';
+  const html = '<html><head><meta charset="utf-8"><style>' + PDF_CSS + '</style></head><body>' + body +
+    '<table class="kyc"><tr><th>Verification Field</th><th>Customer Details</th><th>Verification Field</th><th>Customer Details</th></tr>' +
+    row('Valid ID Type &amp; Number', clean(d.idType, 40) + ': ' + clean(d.idNumber, 60), 'Occupancy Status', clean(d.occupancy, 40)) +
+    row('Occupation / Business', clean(d.occupation, 100), 'Landlord Name', clean(d.landlord, 100) || '-') +
+    row('Next of Kin Full Name', clean(d.kinName, 100), 'Next of Kin Phone', clean(d.kinPhone, 40)) +
+    '</table>' +
+    '<div class="signed"><h3>ACCEPTED &amp; AGREED BY: THE CUSTOMER</h3>' +
+    '<p class="lbl">Customer Signature:</p><img src="' + esc(d.signature) + '" width="260">' +
+    '<table class="sig"><tr><td><span class="lbl">Full Legal Name:</span><br><b>' + esc(rec.name) + '</b></td>' +
+    '<td><span class="lbl">Phone / WhatsApp:</span><br><b>' + esc(clean(d.phone, 40)) + '</b></td>' +
+    '<td><span class="lbl">Date:</span><br><b>' + esc(rec.signedAt) + '</b></td></tr></table></div>' +
+    '<p class="record">Signed online at the Solafi signing page. Terms version ' + esc(clean(d.termsVersion, 20)) +
+    '. Agreement text SHA-256: ' + rec.hash + '. Device: ' + esc(clean(d.userAgent, 300)) + '</p>' +
+    '</body></html>';
+  return Utilities.newBlob(html, 'text/html', 'agreement.html').getAs('application/pdf');
+}
+
+const PDF_CSS = [
+  'body{font-family:Arial,sans-serif;font-size:9.5pt;line-height:1.45;color:#0E1A14}',
+  '.ag-mast{border-bottom:2px solid #0E8F66;padding-bottom:8px;margin-bottom:10px}',
+  '.ag-mast p{font-size:8.5pt;color:#55645C;margin:4px 0 0}',
+  '.logo-word{font-size:20pt;font-weight:bold;color:#0E1A14}',
+  'h1{font-size:12.5pt;margin:12px 0 8px}',
+  'h2{font-size:10pt;color:#0E8F66;border-top:1px solid #D8D0BC;padding-top:8px;margin:16px 0 6px}',
+  'h3{font-size:9pt;margin:0 0 6px}',
+  'dl{margin:0 0 8px} dl div{display:inline-block;margin-right:28px} dt{font-size:7.5pt;color:#55645C} dd{margin:0;font-weight:bold}',
+  'table{width:100%;border-collapse:collapse;font-size:8.5pt;margin:6px 0}',
+  'th{background:#F1F3EF;text-align:left;font-size:7.5pt;color:#55645C}',
+  'th,td{border:1px solid #D8D0BC;padding:4px 6px;vertical-align:top}',
+  'td.k{font-weight:bold} td.c{text-align:center}',
+  '.ag-clause{margin:5px 0} .ag-n{color:#55645C}',
+  '.ag-use div{border:1px solid #D8D0BC;padding:6px 10px;margin:6px 0} .ag-use ul{margin:4px 0;padding-left:18px} .note{font-weight:bold}',
+  '.ag-fill{display:inline-block;width:110px;border-bottom:1px solid #0E1A14}',
+  '.signed{border:1px solid #D8D0BC;padding:10px;margin-top:12px} .signed img{border-bottom:1px solid #D8D0BC}',
+  '.sig td{border:0;border-top:1px solid #D8D0BC;padding-top:4px}',
+  '.lbl{font-size:7.5pt;color:#55645C;margin:0}',
+  '.record{font-size:7pt;color:#55645C;margin-top:14px;word-break:break-all}',
+].join('');
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function agreements() {

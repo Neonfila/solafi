@@ -26,6 +26,21 @@ function readFile(file) {
   })
 }
 
+// The PDF maker can't draw SVG, so the signed copy gets the logo as a PNG.
+async function pdfHtml(article) {
+  try {
+    const blob = await (await fetch(`${import.meta.env.BASE_URL}agreement-logo.png`)).blob()
+    const src = await new Promise((resolve) => {
+      const r = new FileReader()
+      r.onload = () => resolve(r.result)
+      r.readAsDataURL(blob)
+    })
+    return article.outerHTML.replace(/<svg[\s\S]*?<\/svg>/, `<img src="${src}" width="30" height="30" alt="" style="vertical-align:-4px;margin-right:6px">`)
+  } catch {
+    return article.outerHTML
+  }
+}
+
 function Upload({ label, file, onFile }) {
   return (
     <label className={`upload${file ? ' upload--done' : ''}`}>
@@ -108,6 +123,7 @@ export default function Sign() {
         files: { id: await readFile(files.id), proof: await readFile(files.proof) },
         termsVersion: TERMS_VERSION,
         text,
+        html: await pdfHtml(agreementRef.current),
         textHash: await sha256(text),
         userAgent: navigator.userAgent,
       }
@@ -166,7 +182,7 @@ export default function Sign() {
     <section className="section sign-page">
       <div className="wrap">
         {demo && <p className="preview-note sign-demo">Sample agreement</p>}
-        <Agreement d={d} ref={agreementRef} />
+        <Agreement d={d} customer={{ name: f.fullName, phone: f.phone }} ref={agreementRef} />
 
         <form className="sign-form" onSubmit={submit}>
           <h2>Your details</h2>
