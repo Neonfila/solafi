@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp dist/index.html dist/404.html",
+    "build": "vite build && cp dist/index.html dist/404.html && mkdir -p dist/sign && cp dist/index.html dist/sign/index.html",
     "preview": "vite preview",
-    "test": "node --test src/lib/calc.test.js"
+    "test": "node --test src/lib/calc.test.js src/lib/agreement.test.js"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

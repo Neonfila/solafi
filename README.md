@@ -19,6 +19,7 @@ npm run build   # production build in dist/
 - `src/components/StreetScene.jsx` — hero visual (the street where one house stays lit).
 - `src/components/Waitlist.jsx` — waitlist form. It sends nothing until `VITE_WAITLIST_ENDPOINT` is set to a form backend URL that accepts a JSON POST.
 - `src/pages/Home.jsx`, `About.jsx` — the two pages.
+- `src/pages/Sign.jsx` — the client signing page, at `/sign/#<token>` (not linked from the site, not indexed). `/sign/#demo` shows a sample and sends nothing. The agreement wording is in `src/lib/agreement.js` (bump `TERMS_VERSION` when it changes); each client's details come from a private Google Sheet through `tools/agreement-apps-script.gs`, whose header explains the setup. Its web app URL goes in `agreementEndpoint` in `config.js`.
 
 ## Not done yet
 
