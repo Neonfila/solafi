@@ -17,7 +17,7 @@
 //      agreements", and you get an email.
 
 // Change to the live address once the new site is on main.
-const SIGN_PAGE = 'https://neonfila.github.io/solafi/preview/sign/#';
+const SIGN_PAGE = 'https://neonfila.github.io/solafi/sign/#';
 const FOLDER = 'Solafi agreements';
 const MAX_FILE = 5 * 1024 * 1024;
 
