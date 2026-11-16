@@ -32,3 +32,9 @@ test('clauses carry the client address and plan length', () => {
 test('an unknown package is refused, not shown blank', () => {
   assert.throws(() => prepare({ ...DEMO_ROW, package: 'nope' }), /Unknown package/)
 })
+
+test('with no address typed yet, the clauses say "your address"', () => {
+  const c = clauses(prepare({ ...DEMO_ROW, address: '' }))
+  assert.match(c.s1[0][2], /premises at your address strictly/)
+  assert.match(c.s5[2][2], /from your address without/)
+})

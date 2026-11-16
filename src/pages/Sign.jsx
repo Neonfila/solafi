@@ -55,7 +55,7 @@ export default function Sign() {
   const token = decodeURIComponent(window.location.hash.slice(1))
   const [state, setState] = useState('loading') // loading | missing | error | ready | sending | signed | already
   const [d, setD] = useState(null)
-  const [f, setF] = useState({ fullName: '', phone: '', idType: 'NIN', idNumber: '', occupancy: '', landlord: '', occupation: '', kinName: '', kinPhone: '' })
+  const [f, setF] = useState({ fullName: '', phone: '', address: '', idType: 'NIN', idNumber: '', occupancy: '', landlord: '', occupation: '', kinName: '', kinPhone: '' })
   const [files, setFiles] = useState({ id: null, proof: null })
   const [signature, setSignature] = useState(null)
   const [agree, setAgree] = useState(false)
@@ -77,7 +77,7 @@ export default function Sign() {
     if (token === 'demo') {
       setDemo(true)
       setD(prepare(DEMO_ROW))
-      setF((v) => ({ ...v, fullName: DEMO_ROW.customerName, phone: DEMO_ROW.phone }))
+      setF((v) => ({ ...v, fullName: DEMO_ROW.customerName, phone: DEMO_ROW.phone, address: DEMO_ROW.address }))
       return setState('ready')
     }
     if (!ENDPOINT) return setState('error')
@@ -182,13 +182,14 @@ export default function Sign() {
     <section className="section sign-page">
       <div className="wrap">
         {demo && <p className="preview-note sign-demo">Sample agreement</p>}
-        <Agreement d={d} customer={{ name: f.fullName, phone: f.phone }} ref={agreementRef} />
+        <Agreement d={d} customer={{ name: f.fullName, phone: f.phone, address: f.address }} ref={agreementRef} />
 
         <form className="sign-form" onSubmit={submit}>
           <h2>Your details</h2>
           <div className="sign-grid">
             <label><span>Full legal name</span><input required value={f.fullName} onChange={set('fullName')} autoComplete="name" /></label>
             <label><span>Phone / WhatsApp</span><input required type="tel" inputMode="tel" value={f.phone} onChange={set('phone')} autoComplete="tel" /></label>
+            <label className="wide"><span>Installation address</span><input required value={f.address} onChange={set('address')} autoComplete="street-address" placeholder="House number, street, area, state" /></label>
             <label><span>ID type</span>
               <select value={f.idType} onChange={set('idType')}>
                 <option>NIN</option><option>Passport</option><option>Driver's licence</option>

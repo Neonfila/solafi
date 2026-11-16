@@ -120,6 +120,7 @@ function doPost(e) {
     set('signedAt', signedAt);
     set('signedName', name);
     set('signedPhone', text(d.phone));
+    if (String(d.address || '').trim()) set('address', text(d.address));
     ['idType', 'idNumber', 'occupancy', 'landlord', 'occupation', 'kinName', 'kinPhone'].forEach((k) => set(k, text(d[k])));
     set('folder', folder.getUrl());
     set('textHash', hash);
@@ -172,6 +173,7 @@ const PDF_CSS = [
   'td.k{font-weight:bold} td.c{text-align:center}',
   '.ag-clause{margin:5px 0} .ag-n{color:#55645C}',
   '.ag-use div{border:1px solid #D8D0BC;padding:6px 10px;margin:6px 0} .ag-use ul{margin:4px 0;padding-left:18px} .note{font-weight:bold}',
+  '.ag-account{border:1px solid #0E8F66;padding:6px 10px;margin:6px 0} .ag-account h3{margin:0 0 4px}',
   '.ag-fill{display:inline-block;width:110px;border-bottom:1px solid #0E1A14}',
   '.signed{border:1px solid #D8D0BC;padding:10px;margin-top:12px} .signed img{border-bottom:1px solid #D8D0BC}',
   '.sig td{border:0;border-top:1px solid #D8D0BC;padding-top:4px}',

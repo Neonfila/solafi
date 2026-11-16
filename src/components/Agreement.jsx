@@ -11,7 +11,10 @@ function Clauses({ items }) {
 // The agreement itself, filled with one client's details. `signed` adds the
 // signature and the details the client entered, for the signed copy.
 // `customer` shows the name and phone as the client types them.
-const Agreement = forwardRef(function Agreement({ d, signed, customer }, ref) {
+const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, ref) {
+  // the installation address is the one the client types, not the sheet's
+  const address = (signed?.address || customer?.address || '').trim()
+  const d = { ...row, address, addressShort: address.replace(/\s+State$/i, '') }
   const c = clauses(d)
   const blank = (v) => (v ? <span className="ag-filled">{v}</span> : <span className="ag-fill" />)
   return (
@@ -33,7 +36,7 @@ const Agreement = forwardRef(function Agreement({ d, signed, customer }, ref) {
           <thead><tr><th>Party Role</th><th>Legal Name / Entity</th><th>Registered / Installation Address &amp; Contact</th></tr></thead>
           <tbody>
             <tr><td className="k">1. Provider ("SOLAFI")</td><td>{PROVIDER.name}</td><td>{PROVIDER.address}  |  {PROVIDER.site}</td></tr>
-            <tr><td className="k">2. Customer ("Customer")</td><td>{blank(signed?.fullName || customer?.name || d.customerName)}</td><td>{d.address}  |  Tel {blank(signed?.phone || customer?.phone || d.phone)}</td></tr>
+            <tr><td className="k">2. Customer ("Customer")</td><td>{blank(signed?.fullName || customer?.name || d.customerName)}</td><td>{blank(d.address)}  |  Tel {blank(signed?.phone || customer?.phone || d.phone)}</td></tr>
           </tbody>
         </table>
       </div>
@@ -47,8 +50,6 @@ const Agreement = forwardRef(function Agreement({ d, signed, customer }, ref) {
             {d.pkg.components.map((row, i) => (
               <tr key={row[0]}><td className="c">{i + 1}</td><td className="k">{row[0]}</td><td>{row[1]}</td><td>{row[2]}</td><td>{row[3]}</td></tr>
             ))}
-            <tr><td className="c">{d.pkg.components.length + 1}</td><td className="k">Installation Site Address</td><td>{d.addressShort}</td><td colSpan="2">Handover Date: {blank(d.handoverDate)}</td></tr>
-            <tr><td className="c">{d.pkg.components.length + 2}</td><td className="k">Hardware Serial Numbers</td><td>Inverter S/N: {blank(d.inverterSerial)}</td><td colSpan="2">Battery S/N: {blank(d.batterySerial)}</td></tr>
           </tbody>
         </table>
       </div>
@@ -56,14 +57,23 @@ const Agreement = forwardRef(function Agreement({ d, signed, customer }, ref) {
 
       <h2>2. PRICE, REPAYMENT PLAN &amp; DEFAULT RULES (SCHEDULE B)</h2>
       <Clauses items={c.s2a} />
+      <div className="ag-account">
+        <h3>DESIGNATED PAYMENT ACCOUNT</h3>
+        <dl>
+          <div><dt>Account Name</dt><dd>{d.accountName}</dd></div>
+          <div><dt>Account Number</dt><dd className="big">{d.accountNumber}</dd></div>
+          <div><dt>Bank</dt><dd>{d.bankName}</dd></div>
+        </dl>
+      </div>
       <div className="ag-scroll">
         <table className="ag-money">
-          <thead><tr><th>Financial Term</th><th>Contract Value / Rule</th><th>Payment / Bank Term</th><th>Designated Account / Rule</th></tr></thead>
+          <thead><tr><th>Financial Term</th><th>Contract Value / Rule</th></tr></thead>
           <tbody>
-            <tr><td className="k">System Cash Price</td><td>{money(d.cashPrice)}</td><td className="k">Designated Bank Name</td><td>{d.bankName}</td></tr>
-            <tr><td className="k">Initial Deposit (Upfront)</td><td className="big">{money(d.deposit)}</td><td className="k">Account Number</td><td className="big">{d.accountNumber}</td></tr>
-            <tr><td className="k">Monthly Instalment</td><td><span className="big">{money(d.monthly)}</span> / month (for {d.months} Months)</td><td className="k">Account Name</td><td>{d.accountName}</td></tr>
-            <tr><td className="k">Total {d.months}-Month Plan Value</td><td>{money(d.total)} (Financed Bal: {money(d.instalments)})</td><td className="k">First Payment Due</td><td>Exactly 30 Days after Handover Date</td></tr>
+            <tr><td className="k">System Cash Price</td><td>{money(d.cashPrice)}</td></tr>
+            <tr><td className="k">Initial Deposit (Upfront)</td><td className="big">{money(d.deposit)}</td></tr>
+            <tr><td className="k">Monthly Instalment</td><td><span className="big">{money(d.monthly)}</span> / month (for {d.months} Months)</td></tr>
+            <tr><td className="k">Total {d.months}-Month Plan Value</td><td>{money(d.total)} (Financed Bal: {money(d.instalments)})</td></tr>
+            <tr><td className="k">First Payment Due</td><td>Exactly 30 Days after Handover Date</td></tr>
           </tbody>
         </table>
       </div>

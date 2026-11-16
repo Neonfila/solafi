@@ -6,7 +6,7 @@
 // ever in this public repo. Change the wording here and bump TERMS_VERSION:
 // every signature records the version and the exact text that was shown.
 
-export const TERMS_VERSION = 'v3.1'
+export const TERMS_VERSION = 'v3.2'
 
 export const PROVIDER = {
   name: 'SOLAFI TECHNOLOGY LIMITED',
@@ -68,7 +68,7 @@ export function prepare(row) {
     pkg,
     months,
     // the site address without "State", as v3 writes it in the table and clause 5.3
-    addressShort: String(row.address).replace(/\s+State$/i, ''),
+    addressShort: String(row.address || '').replace(/\s+State$/i, ''),
     instalments,
     total: Number(row.deposit) + instalments,
   }
@@ -79,8 +79,8 @@ export function clauses(d) {
   const months = inWords(d.months)
   return {
     s1: [
-      ['1.1', 'Supply & Installation:', `SOLAFI agrees to supply, deliver, install, and commission the ${d.pkg.system} ("the System") at the Customer's premises at ${d.address} strictly in accordance with the System Specification Table below:`],
-      ['1.2', 'Site Readiness & Handover:', 'SOLAFI shall install and test the System upon confirmation of the Initial Deposit and KYC details. The Customer shall provide safe access to the premises and confirm completion by signing this Agreement and the handover date above.'],
+      ['1.1', 'Supply & Installation:', `SOLAFI agrees to supply, deliver, install, and commission the ${d.pkg.system} ("the System") at the Customer's premises at ${d.address || 'your address'} strictly in accordance with the System Specification Table below:`],
+      ['1.2', 'Site Readiness & Handover:', 'SOLAFI shall install and test the System upon confirmation of the Initial Deposit and KYC details. The Customer shall provide safe access to the premises and confirm completion by signing this Agreement and the handover date.'],
     ],
     s2a: [['2.1', 'Repayment Structure:', `The Customer shall pay the Initial Deposit prior to installation and pay the remaining balance in ${months} equal monthly instalments every thirty (30) calendar days from the handover date into the designated bank account below:`]],
     s2b: [
@@ -96,7 +96,7 @@ export function clauses(d) {
     s5: [
       ['5.1', 'Warranty Coverage & Exclusions:', `Warranties (${d.pkg.warranties}) cover manufacturing defects only while the Customer is not in payment default. Warranties are immediately voided if the Customer overloads the System, tampers with wiring, or allows third-party roadside electricians to alter the setup.`],
       ['5.2', 'Routine & Post-Warranty Maintenance:', 'The Customer is responsible for keeping solar panels clean of dust and debris. After warranty expiration, SOLAFI shall offer discounted maintenance and servicing to the Customer.'],
-      ['5.3', 'Strict Relocation Ban & Site Access:', `The Customer shall not uninstall or move the System from ${d.addressShort} without SOLAFI's prior written consent; approved relocations must be performed solely by SOLAFI engineers at the Customer's expense. The Customer grants SOLAFI daylight access for inspections (with 24 hours' notice) or immediate lawful repossession upon a 30-day default.`],
+      ['5.3', 'Strict Relocation Ban & Site Access:', `The Customer shall not uninstall or move the System from ${d.addressShort || 'your address'} without SOLAFI's prior written consent; approved relocations must be performed solely by SOLAFI engineers at the Customer's expense. The Customer grants SOLAFI daylight access for inspections (with 24 hours' notice) or immediate lawful repossession upon a 30-day default.`],
       ['5.4', 'Risk of Loss & Home Insurance Advisory:', "Upon installation, the Customer bears full risk of loss or damage from theft, fire, vandalism, or power surges (except caused by SOLAFI's defective installation), and such loss shall not excuse remaining monthly payments. The Customer is strongly advised to include the System under a comprehensive home or property insurance policy."],
     ],
     s6: [

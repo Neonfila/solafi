@@ -449,6 +449,11 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .agreement td.k { font-weight: 700; }
 .agreement td.c { color: var(--muted); text-align: center; }
 .agreement .big { font-weight: 700; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.agreement .ag-money { min-width: 0; }
+.ag-account { margin: 0.9rem 0; padding: 0.9rem 1rem; border: 1px solid var(--sun); border-radius: 12px; }
+.ag-account dl { display: flex; flex-wrap: wrap; gap: 0.6rem 2rem; margin: 0; }
+.ag-account dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.ag-account dd { margin: 0; font-weight: 700; }
 .ag-fill { display: inline-block; min-width: 9em; border-bottom: 1px solid var(--muted); height: 1em; vertical-align: baseline; }
 .ag-filled { font-weight: 700; }
 .ag-use { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.9rem 0; }
@@ -473,6 +478,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .sign-grid label, .sign-occupancy { display: grid; gap: 0.4rem; min-width: 0; }
 .sign-grid label > span, .sign-occupancy legend { font-size: 0.9rem; color: var(--muted); padding: 0; }
 .sign-occupancy { border: 0; padding: 0; margin: 0; grid-column: 1 / -1; }
+.sign-grid .wide { grid-column: 1 / -1; }
 .sign-grid input, .sign-grid select { height: 50px; padding: 0 0.9rem; border-radius: 12px; background: var(--ink-2); border: 1px solid var(--line-2); font: inherit; color: inherit; width: 100%; outline: 0; transition: border-color 160ms; }
 .sign-grid input:focus, .sign-grid select:focus { border-color: var(--sun); }
 .sign-grid .upload { display: flex; align-items: center; gap: 0.8rem; padding: 1rem; border-radius: 12px; border: 1px dashed var(--line-2); background: var(--ink-2); cursor: pointer; color: var(--muted); }
