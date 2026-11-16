@@ -1,160 +1,163 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Zap, ZapOff } from 'lucide-react'
 
-// Hero visual: a street at night. When the grid drops, the street flickers out,
-// the generators cough into life, and the house with solar simply stays on.
-const houses = [
-  { x: 14, w: 104, h: 118, roof: 34, win: [[18, 34], [62, 34], [18, 76]] },
-  { x: 132, w: 92, h: 150, roof: 0, win: [[14, 24], [54, 24], [14, 66], [54, 66], [14, 108]], gen: true },
-  { x: 418, w: 96, h: 136, roof: 30, win: [[16, 30], [58, 30], [58, 78]], gen: true },
-  { x: 528, w: 100, h: 166, roof: 0, win: [[16, 24], [60, 24], [16, 68], [60, 68], [60, 112]] },
-]
-const GROUND = 330
-const stars = [[40, 40], [150, 70], [210, 30], [300, 58], [372, 26], [440, 84], [560, 34], [610, 90], [86, 120], [262, 96], [500, 30], [340, 92]]
+// Hero visual: one long street running off both edges of the page.
+// When NEPA takes light the story plays in beats, each one caused by the last:
+//   1. the supply sags: every grid window dims for a moment
+//   2. the transformer on the pole gives out, and windows go dark outward from it
+//   3. a few neighbours pull-start their generators: dim, unsteady amber windows
+//   4. the Solafi house has not changed at any point
+// When light comes back, windows flicker on outward from the transformer and the
+// generators cut out. On a phone the crop keeps the house, the pole and two neighbours.
+const W = 1000
+const H = 340
+const GROUND = 320
+const WIN = { w: 16, h: 20, pitch: 34, top: 20 }
+const TRANSFORMER = { x: 664, y: 128 }
 
+// [x, width, height, columns]; the gap in the middle belongs to the house
+const blocks = [
+  [-10, 90, 170, 2], [88, 70, 230, 2], [166, 96, 140, 3], [270, 64, 196, 2], [342, 82, 118, 2],
+  [576, 84, 150, 2], [668, 66, 214, 2], [742, 100, 128, 3], [850, 72, 188, 2], [930, 90, 160, 2],
+].map(([x, w, h, cols]) => ({ x, w, h, cols, rows: Math.floor((h - 24) / WIN.pitch) }))
+
+// block index -> how long after the blackout that household gets its generator going
+const generators = { 4: 900, 6: 1350, 1: 1900, 8: 1650 }
+
+const HOUSE = { x: 432, w: 136, top: GROUND - 140, peak: GROUND - 196 }
+const BATTERY = { x: 542, y: 272 }
+const houseWindows =[[452, 196], [490, 196], [528, 196], [452, 240], [528, 240]]
+
+// two poles and the sagging line between them
+const POLES = [338, 664]
+const POLE_TOP = 96
+const wire = `M-20 ${POLE_TOP + 22} Q160 ${POLE_TOP + 40} ${POLES[0]} ${POLE_TOP + 4} Q${(POLES[0] + POLES[1]) / 2} ${POLE_TOP + 30} ${POLES[1]} ${POLE_TOP + 4} Q830 ${POLE_TOP + 40} 1020 ${POLE_TOP + 22}`
+
+function windowsOf(b, bi) {
+  const pad = 12
+  const step = b.cols > 1 ? (b.w - pad * 2 - WIN.w) / (b.cols - 1) : 0
+  const out = []
+  for (let r = 0; r < b.rows; r++) {
+    for (let c = 0; c < b.cols; c++) {
+      const x = b.x + pad + c * step
+      out.push({
+        x,
+        y: GROUND - b.h + WIN.top + r * WIN.pitch,
+        // a few windows are simply not in use tonight
+        unlit: (bi * 7 + r * 3 + c * 5) % 4 === 0,
+        // generators only run a couple of bulbs on the lower floors
+        gen: bi in generators && r >= b.rows - 2 && (r + c) % 2 === 0,
+        // the blackout and the return travel outward from the transformer
+        delay: Math.round(Math.abs(x + WIN.w / 2 - TRANSFORMER.x) * 0.85),
+      })
+    }
+  }
+  return out
+}
+
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// phases: on -> dip -> out -> gen, and back to on
 export default function StreetScene() {
-  const [grid, setGrid] = useState(true)
-  const [touched, setTouched] = useState(false)
+  const reduced = useRef(reducedMotion()).current
+  const [phase, setPhase] = useState(reduced ? 'gen' : 'on')
+  const [returned, setReturned] = useState(false)
+  const [touched, setTouched] = useState(reduced)
+  const timers = useRef([])
 
+  const clear = () => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+  }
+  const later = (ms, fn) => timers.current.push(setTimeout(fn, ms))
+
+  const takeLight = () => {
+    clear()
+    if (reduced) return setPhase('gen')
+    setPhase('dip')
+    later(320, () => setPhase('out'))
+    later(320 + 700, () => setPhase('gen'))
+  }
+  const bringLight = () => {
+    clear()
+    setReturned(true)
+    setPhase('on')
+  }
+
+  // until someone touches it, the street plays by itself
   useEffect(() => {
     if (touched) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const t = setTimeout(() => setGrid((g) => !g), grid ? 3200 : 5200)
-    return () => clearTimeout(t)
-  }, [touched, grid])
+    if (phase === 'on') later(3400, takeLight)
+    if (phase === 'gen') later(4800, bringLight)
+  }, [phase, touched])
 
+  useEffect(() => clear, [])
+
+  const grid = phase === 'on'
   const toggle = () => {
     setTouched(true)
-    setGrid((g) => !g)
+    grid ? takeLight() : bringLight()
   }
 
   return (
-    <div className={`scene ${grid ? 'scene--on' : 'scene--off'}`}>
+    <div className={`scene scene--${phase}${grid ? '' : ' scene--dark'}${returned ? ' scene--back' : ''}`}>
       <div className="scene-stage">
-        <svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A street at night. When the grid goes off, only the house with Solafi solar stays lit.">
-          <defs>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#040A12" />
-              <stop offset="1" stopColor="#0E2A22" />
-            </linearGradient>
-            <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#FFB800" stopOpacity="0.6" />
-              <stop offset="1" stopColor="#FFB800" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient id="pool" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#FFCB45" stopOpacity="0.5" />
-              <stop offset="1" stopColor="#FFCB45" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#3B6CF0" />
-              <stop offset="1" stopColor="#0E2A6B" />
-            </linearGradient>
-          </defs>
-
-          <rect width="640" height="400" fill="url(#sky)" />
-          <g fill="#F4F1E8" className="stars">
-            {stars.map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.7 : 1.1} className="star" style={{ animationDelay: `${i * 0.37}s` }} />
-            ))}
-          </g>
-          <circle cx="468" cy="62" r="18" fill="#F4F1E8" opacity="0.92" />
-          <circle cx="460" cy="56" r="18" fill="#07101A" />
-
-          {/* grid: poles, wire, and the current running through it */}
-          <g>
-            {[125, 521].map((x) => (
-              <g key={x} fill="#0A1712">
-                <rect x={x - 2.5} y="92" width="5" height={GROUND - 92} />
-                <rect x={x - 16} y="98" width="32" height="4" />
-              </g>
-            ))}
-            <path d="M0 110 Q62 126 125 100 Q323 136 521 100 Q580 124 640 108" className="wire" />
-            <path d="M0 110 Q62 126 125 100 Q323 136 521 100 Q580 124 640 108" className="wire-current" />
-            <g className="spark" transform="translate(125 99)">
-              <path d="M0 -13 L3 -3 L13 0 L3 3 L0 13 L-3 3 L-13 0 L-3 -3 Z" fill="#FFE9A8" />
-            </g>
-          </g>
-
-          {/* the neighbours */}
-          {houses.map((h, i) => {
-            const top = GROUND - h.h
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" role="img" aria-label="A street in the evening. When NEPA takes light the neighbours go dark and some start generators. Only the house with Solafi solar stays lit as it was.">
+          {blocks.map((b, bi) => {
+            const wins = windowsOf(b, bi)
             return (
-              <g key={i}>
-                {h.roof > 0 && <path d={`M${h.x - 6} ${top} L${h.x + h.w / 2} ${top - h.roof} L${h.x + h.w + 6} ${top} Z`} fill="#0B1A15" />}
-                <rect x={h.x} y={top} width={h.w} height={h.h} fill="#0F211B" />
-                {h.win.map(([wx, wy], j) => (
-                  <rect
-                    key={j}
-                    x={h.x + wx} y={top + wy} width="26" height="28" rx="2"
-                    className={`win ${h.gen && j === 0 ? 'win--gen' : ''}`}
-                    style={{ animationDelay: `${((i * 5 + j * 3) % 7) * 70}ms` }}
-                  />
+              <g key={b.x} style={{ '--g': `${generators[bi] ?? 0}ms` }}>
+                <rect x={b.x} y={GROUND - b.h} width={b.w} height={b.h} className="block-wall" />
+                {wins.map((w, i) => (
+                  <rect key={i} x={w.x} y={w.y} width={WIN.w} height={WIN.h} rx="2" style={{ '--d': `${w.delay}ms` }} className={w.unlit ? 'win win--unlit' : 'win'} />
+                ))}
+                {wins.filter((w) => w.gen).map((w, i) => (
+                  <rect key={`g${i}`} x={w.x} y={w.y} width={WIN.w} height={WIN.h} rx="2" className="win-gen" />
                 ))}
               </g>
             )
           })}
 
-          {/* the street loses its light */}
-          <rect width="640" height="400" className="dim" />
-
-          {houses.filter((h) => h.gen).map((h) => (
-            <g key={h.x} className="gen" transform={`translate(${h.x + h.w - 36} ${GROUND - 21})`}>
-              <text x="14" y="-22" textAnchor="middle" className="vrr">vrrrr</text>
-              <circle className="smoke" cx="30" cy="-2" r="5" />
-              <circle className="smoke smoke--2" cx="34" cy="-6" r="7" />
-              <circle className="smoke smoke--3" cx="30" cy="-10" r="9" />
-              <g className="gen-body">
-                <rect width="28" height="18" rx="3" fill="#E5484D" />
-                <rect x="4" y="4" width="10" height="6" rx="1" fill="#06100C" opacity="0.5" />
-                <rect x="2" y="18" width="4" height="3" fill="#06100C" />
-                <rect x="22" y="18" width="4" height="3" fill="#06100C" />
-              </g>
+          <g className="house">
+            <path d={`M${HOUSE.x - 10} ${HOUSE.top} L${HOUSE.x + HOUSE.w / 2} ${HOUSE.peak} L${HOUSE.x + HOUSE.w + 10} ${HOUSE.top} Z`} className="house-roof" />
+            {/* the panel, lying on the right slope of the roof */}
+            <g transform={`translate(508 ${HOUSE.peak + 10}) skewY(35.7)`}>
+              <rect width="44" height="12" className="panel" />
+              <path d="M11 0v12M22 0v12M33 0v12M0 6h44" className="panel-grid" />
             </g>
-          ))}
-
-          <rect y={GROUND} width="640" height="70" fill="#06120E" />
-          <path d={`M0 ${GROUND + 36}h640`} stroke="#F4F1E8" strokeOpacity="0.1" strokeWidth="2" strokeDasharray="26 22" />
-          <ellipse cx="320" cy={GROUND + 14} rx="170" ry="24" fill="url(#pool)" className="pool" />
-
-          {/* the Solafi house */}
-          <g className="solafi-house">
-            <ellipse cx="320" cy="248" rx="170" ry="130" fill="url(#halo)" className="halo" />
-            <path d="M236 196 L320 138 L404 196 Z" fill="#14342A" />
-            <g transform="translate(330 150) skewY(34.6)">
-              <rect width="58" height="26" fill="url(#panel)" stroke="#9DBEFF" strokeWidth="1" />
-              <path d="M14.5 0v26M29 0v26M43.5 0v26M0 13h58" stroke="#9DBEFF" strokeWidth="0.7" opacity="0.7" />
-            </g>
-            <rect x="246" y="196" width="148" height={GROUND - 196} fill="#18392E" />
-            {[[262, 214], [304, 214], [346, 214], [262, 262], [346, 262]].map(([x, y], i) => (
-              <rect key={i} x={x} y={y} width="30" height="32" rx="2" fill="#FFCB45" className="win-solar" />
+            <rect x={HOUSE.x} y={HOUSE.top} width={HOUSE.w} height={GROUND - HOUSE.top} className="house-wall" />
+            {houseWindows.map(([x, y]) => (
+              <rect key={`${x}-${y}`} x={x} y={y} width="20" height="24" rx="2" className="win-solar" />
             ))}
-            <rect x="304" y="270" width="32" height="60" rx="2" fill="#0A1712" />
-            <circle cx="330" cy="302" r="2" fill="#FFB800" />
-            {/* battery feeding the house */}
-            <path d="M408 286 V246 H394" className="feed" />
-            <g transform="translate(398 286)">
-              <rect width="20" height="44" rx="4" fill="#0A1712" stroke="#7CF29A" strokeWidth="1.5" />
-              <rect x="4" y="6" width="12" height="7" rx="1.5" fill="#7CF29A" className="cell" />
-              <rect x="4" y="16" width="12" height="7" rx="1.5" fill="#7CF29A" />
-              <rect x="4" y="26" width="12" height="7" rx="1.5" fill="#7CF29A" />
-              <rect x="4" y="36" width="12" height="4" rx="1.5" fill="#7CF29A" />
-            </g>
+            <rect x="488" y={GROUND - 60} width="24" height="60" rx="2" className="house-door" />
+            {/* panel to battery: power runs down while the sun charges it */}
+            <path d={`M553 ${HOUSE.top - 4} V${BATTERY.y}`} className="cable" />
+            <path d={`M553 ${HOUSE.top - 4} V${BATTERY.y}`} className="cable-flow" />
+            {/* the battery on the wall; while NEPA is off it runs the house and its charge goes down */}
+            <rect x={BATTERY.x} y={BATTERY.y} width="22" height="42" rx="4" className="battery" />
+            {[0, 1, 2, 3].map((i) => (
+              <rect key={i} x={BATTERY.x + 4} y={BATTERY.y + 6 + i * 9} width="14" height="6" rx="1.5" className={`cell cell--${i}`} />
+            ))}
           </g>
 
-          <rect width="640" height="400" className="flash" />
-        </svg>
+          {/* the street's power line, in front of everything */}
+          <path d={wire} className="wire" />
+          {POLES.map((x) => (
+            <rect key={x} x={x - 3} y={POLE_TOP} width="6" height={GROUND - POLE_TOP} className="pole" />
+          ))}
+          <rect x={TRANSFORMER.x - 13} y={TRANSFORMER.y} width="26" height="34" rx="3" className="transformer" />
+          <circle cx={TRANSFORMER.x} cy={TRANSFORMER.y + 6} r="3" className="transformer-lamp" />
+          <circle cx={TRANSFORMER.x} cy={TRANSFORMER.y + 6} r="16" className="spark" />
 
-        <div className="scene-status" aria-live="polite">
-          <span className="scene-dot" />
-          {grid ? 'NEPA is on' : 'NEPA has taken light'}
-        </div>
+          <rect y={GROUND} width={W} height={H - GROUND} className="ground" />
+        </svg>
       </div>
 
-      <div className="scene-bar">
-        <div className="scene-tag">
-          <strong>The Solafi house</strong>
-          <span>{grid ? 'Running on stored sunshine' : 'Still on. No generator.'}</span>
-        </div>
+      <div className="wrap scene-bar">
+        <p className="scene-status" aria-live="polite">
+          <span className="scene-dot" />
+          <strong>{grid ? 'NEPA is on' : 'NEPA has taken light'}</strong>
+        </p>
         <button type="button" className="scene-switch" onClick={toggle} aria-pressed={!grid}>
           {grid ? <ZapOff size={16} /> : <Zap size={16} />}
           {grid ? 'Take light' : 'Bring light back'}

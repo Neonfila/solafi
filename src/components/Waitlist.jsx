@@ -41,8 +41,7 @@ export default function Waitlist({ estimate }) {
       <div className="waitlist-done">
         <span className="tick"><Check size={26} /></span>
         <h3>You are on the list.</h3>
-        <p>We will reach out as soon as Solafi opens in your area.</p>
-        {state === 'preview' && <p className="preview-note">Preview mode: the form is not connected yet, so nothing was sent.</p>}
+        {state === 'preview' && <p className="preview-note">Preview: nothing was sent.</p>}
       </div>
     )
   }
@@ -56,24 +55,24 @@ export default function Waitlist({ estimate }) {
       </div>
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hp" />
       <label>
-        <span>Full name</span>
-        <input name="name" required autoComplete="name" placeholder="Your name" />
+        <span>Name</span>
+        <input name="name" required autoComplete="name" />
       </label>
       <label>
         <span>Phone or WhatsApp</span>
-        <input name="phone" required type="tel" autoComplete="tel" inputMode="tel" placeholder="080..." />
+        <input name="phone" required type="tel" autoComplete="tel" inputMode="tel" />
       </label>
       <label>
         <span>Email <em>optional</em></span>
-        <input name="email" type="email" autoComplete="email" placeholder="you@example.com" />
+        <input name="email" type="email" autoComplete="email" />
       </label>
       <label>
         <span>City or area</span>
-        <input name="city" required autoComplete="address-level2" placeholder="Where should we install?" />
+        <input name="city" required autoComplete="address-level2" />
       </label>
       {estimate && (
         <p className="estimate-chip">
-          Your estimate goes with it: {estimate.system}, about {naira(estimate.solafiMonthly)}/month against {naira(estimate.currentMonthly)} now.
+          Sends your estimate: {estimate.system}, {naira(estimate.solafiMonthly)}/month.
         </p>
       )}
       <button className="btn btn--sun btn--block" disabled={state === 'sending'}>

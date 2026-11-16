@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
+import { Menu, Moon, Sun, X } from 'lucide-react'
 import Logo from './Logo.jsx'
+import { setMode, useMode } from '../lib/theme.js'
 
 const links = [
   { to: '/#how', label: 'How it works' },
@@ -15,6 +16,8 @@ export default function Nav() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
+  const mode = useMode()
+  const next = mode === 'dark' ? 'light' : 'dark'
 
   useEffect(() => setOpen(false), [location])
   useEffect(() => {
@@ -34,6 +37,9 @@ export default function Nav() {
           ))}
         </nav>
         <Link to="/#waitlist" className="btn btn--sun btn--sm nav-cta">Join the waitlist</Link>
+        <button type="button" className="mode-toggle" aria-label={`Switch to ${next} mode`} title={`Switch to ${next} mode`} onClick={() => setMode(next)}>
+          {mode === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+        </button>
         <button className="nav-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>

@@ -19,6 +19,10 @@ export const brand = {
 // (see tools/waitlist-apps-script.gs). Empty = preview mode, nothing is sent.
 export const waitlistEndpoint = 'https://script.google.com/macros/s/AKfycbyGS9V-yKAaqHk2tsIrJ7ucKlEup6rzB7lmqO08uYeCRrusEieAKAbfZUV3hGaSlqIO/exec'
 
+// Where the signing page loads and saves agreements: the Google Apps Script web
+// app URL (see tools/agreement-apps-script.gs). Empty = only /sign/#demo works.
+export const agreementEndpoint = 'https://script.google.com/macros/s/AKfycbxQ2QXgf_7qW1BZjfb2TYg1puxPQN9zoT7xf8zrYyn1tcSXnUHV70V8sviBFK3axhyhHA/exec'
+
 // Public reference prices (looked up, not invented). Update when they move.
 export const reference = {
   petrolPerLitre: 1360,
@@ -51,31 +55,25 @@ export const generators = [
 export const packages = [
   {
     id: 'p3',
-    name: 'Starter',
     kw: 3,
     batteryKwh: 5,
     price: 2500000,
     fits: 'Flat or small home',
-    runs: ['Lights and fans', 'TV and decoder', 'Fridge', 'Laptops and Wi-Fi'],
   },
   {
     id: 'p5',
-    name: 'Family',
     kw: 5,
     batteryKwh: 10,
     price: 4500000,
     fits: 'Family home or small office',
     featured: true,
-    runs: ['Everything in Starter', 'Freezer', 'One 1 hp inverter AC', 'Pumping machine'],
   },
   {
     id: 'p10',
-    name: 'Business',
     kw: 10,
     batteryKwh: 20,
     price: 8500000,
     fits: 'Large home or business',
-    runs: ['Everything in Family', 'Several ACs', 'Shop or office equipment', 'Longer backup'],
   },
 ]
 
