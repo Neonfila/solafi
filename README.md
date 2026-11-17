@@ -24,4 +24,4 @@ npm run build   # production build in dist/
 ## Not done yet
 
 - Waitlist backend, contact details (email, WhatsApp), cities served.
-- The solafi.ng domain. The site deploys to GitHub Pages from `main` (`.github/workflows/deploy.yml`) under `/solafi/`; when the domain is connected, remove `VITE_BASE` from the workflow.
+- The site deploys to GitHub Pages from `main` (`.github/workflows/deploy.yml`) at https://solafi.ng (DNS on Cloudflare, DNS only; registrar hosting.com).
