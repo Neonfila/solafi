@@ -26,7 +26,7 @@ export default function PayTimeline() {
     <ol ref={ref} className={`track${seen ? ' track--in' : ''}`} style={{ '--n': tenorMonths }}>
       <li>
         <span className="track-mark"><i className="track-dot" /></span>
-        <h3>Tell us what you run</h3>
+        <h3>Tell us what you want to power</h3>
         <p>Today</p>
       </li>
       <li>

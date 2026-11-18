@@ -6,12 +6,16 @@ import Calculator from '../components/Calculator.jsx'
 import PayTimeline from '../components/PayTimeline.jsx'
 import Waitlist from '../components/Waitlist.jsx'
 import { naira, nairaShort } from '../lib/calc.js'
-import { useProducts } from '../lib/products.js'
+import { featuredOf, useProducts } from '../lib/products.js'
 
 
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
-  { q: 'Which system do I need?', a: 'Each system above lists what it runs. Tell us what you want to power and we size it with you.' },
+  { q: 'Which package do I need?', a: 'Each package above lists what it powers. Tell us what you want to run and we help you pick.' },
+  { q: 'What do kVA and kWh mean?', a: 'kVA is how much the inverter can carry at the same time: more kVA, more appliances on together. kWh is how much the battery stores: more kWh, more hours of light at night.' },
+  { q: 'Who owns the system while I am paying?', a: 'Solafi does, until your last payment. Then it is fully yours.' },
+  { q: 'How do I pay?', a: 'By bank transfer into the Solafi account written in your agreement. Never pay cash to an installer or any staff.' },
+  { q: 'What if I miss a payment?', a: 'You have 3 days to pay with no penalty. From day 4, a late fee of ₦5,000 a day is added. From day 7, the system is switched off until you pay. After 30 days unpaid, Solafi takes the system back.' },
   { q: 'Do I still need NEPA?', a: 'Keep it as a backup. Most people use far less of it and stop using the generator.' },
   { q: 'Where is Solafi available?', a: 'We are opening area by area. Join the waitlist and we will tell you when we reach you.' },
 ]
@@ -20,12 +24,17 @@ export default function Home() {
   const [estimate, setEstimate] = useState(null)
   const [openFaq, setOpenFaq] = useState(0)
   const products = useProducts()
+  const main = featuredOf(products)
+  const depositPct = Math.round((main.deposit / main.cashPrice) * 100)
 
   return (
     <>
       <section className="hero">
         <div className="wrap hero-head">
-          <h1>Go solar now.<br /><span className="sun-text">Pay small‑small.</span></h1>
+          <div>
+            <h1>Go solar now.<br /><span className="sun-text">Pay small‑small.</span></h1>
+            <p className="hero-sub">We install solar panels, an inverter and a battery at your home or shop. Pay {depositPct}% first, then the rest monthly for {main.months} months. After that, it is yours.</p>
+          </div>
           <Link to="/#calculator" className="btn btn--sun hero-go">See what you would save <ArrowRight size={18} /></Link>
         </div>
         <StreetScene />
@@ -47,7 +56,8 @@ export default function Home() {
 
       <section id="packages" className="section">
         <div className="wrap">
-          <h2>Systems</h2>
+          <h2>Solar packages</h2>
+          <p className="section-lede">Every price includes installation. Pay {depositPct}% first, then monthly for {main.months} months.</p>
           <ul className="plans">
             {products.map((p) => (
               <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
@@ -55,11 +65,11 @@ export default function Home() {
                   <h3>{p.name}</h3>
                   <span>{[p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
                 </div>
-                <p className="plan-fit">{p.runs}</p>
+                <p className="plan-fit"><b>Powers:</b> {p.runs}</p>
                 <p className="plan-price">
                   <strong>{naira(p.monthly)}<small>/month</small></strong>
                   <span>{p.months} months</span><span>{nairaShort(p.deposit)} deposit</span>
-                  <em>or {nairaShort(p.cashPrice)} paid in full</em>
+                  <em>or {nairaShort(p.cashPrice)} outright</em>
                 </p>
               </li>
             ))}

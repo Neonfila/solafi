@@ -133,8 +133,8 @@ export default function Calculator({ onEstimate }) {
         </fieldset>
 
         <fieldset>
-          <legend>Pick a system</legend>
-          <div className="pkg-pick" role="radiogroup" aria-label="System size">
+          <legend>Pick a package</legend>
+          <div className="pkg-pick" role="radiogroup" aria-label="Package">
             {products.map((p) => (
               <button key={p.id} type="button" role="radio" aria-checked={pkg.id === p.id} className={pkg.id === p.id ? 'on' : ''} onClick={() => setPkgId(p.id)}>
                 <b>{p.name}</b>
@@ -144,7 +144,7 @@ export default function Calculator({ onEstimate }) {
           </div>
 
           <button type="button" className="terms-toggle" aria-expanded={showTerms} onClick={() => setShowTerms(!showTerms)}>
-            Adjust the details
+            Change fuel price and other details
             <ChevronDown size={18} className={showTerms ? 'flip' : ''} />
           </button>
           {showTerms && (
@@ -154,7 +154,7 @@ export default function Calculator({ onEstimate }) {
                 <MoneyField label="Petrol per litre" value={petrol} onChange={setPetrol} />
               </div>
               <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} />
-              <NumField label="Spend solar replaces" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
+              <NumField label="Share of your NEPA and fuel spend solar covers" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
             </div>
           )}
           {!termsAreFinal && (
