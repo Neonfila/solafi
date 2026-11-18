@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowRight, ChevronDown, Info } from 'lucide-react'
 import SavingsChart from './SavingsChart.jsx'
 import { generatorMonthly, project, naira, nairaShort, monthsLabel } from '../lib/calc.js'
-import { calcDefaults, generators, loanDefaults, packages, reference, termsAreFinal } from '../lib/config.js'
+import { calcDefaults, generators, reference, termsAreFinal } from '../lib/config.js'
+import { featuredOf, useProducts } from '../lib/products.js'
 
 function MoneyField({ label, value, onChange, min = 0, max, step = 1000 }) {
   return (
@@ -62,22 +63,17 @@ export default function Calculator({ onEstimate }) {
   const [petrol, setPetrol] = useState(reference.petrolPerLitre)
   const [servicing, setServicing] = useState(d.genServicing)
 
-  const [pkgId, setPkgId] = useState(d.packageId)
-  const [price, setPrice] = useState(packages.find((p) => p.id === d.packageId).price)
-  const [depositPct, setDepositPct] = useState(loanDefaults.depositPct)
-  const [tenor, setTenor] = useState(loanDefaults.tenorMonths)
-  const [rate, setRate] = useState(loanDefaults.monthlyRatePct)
+  const products = useProducts()
+  const [pkgId, setPkgId] = useState(null)
   const [coverage, setCoverage] = useState(d.coveragePct)
   const [showTerms, setShowTerms] = useState(false)
 
-  const pkg = packages.find((p) => p.id === pkgId)
+  // the plan picked, or the featured one; follows the sheet when prices change
+  const pkg = products.find((p) => p.id === pkgId) || featuredOf(products)
+  const tenor = pkg.months
   const pickGen = (id) => {
     setGenId(id)
     setLph(generators.find((g) => g.id === id).litresPerHour)
-  }
-  const pickPkg = (id) => {
-    setPkgId(id)
-    setPrice(packages.find((p) => p.id === id).price)
   }
 
   const gen = useMemo(
@@ -86,13 +82,13 @@ export default function Calculator({ onEstimate }) {
   )
   const current = gridBill + gen.total
   const r = useMemo(
-    () => project({ currentMonthly: current, price, depositPct, tenorMonths: tenor, monthlyRatePct: rate, coveragePct: coverage, escalationPct: 0, years: CHART_YEARS }),
-    [current, price, depositPct, tenor, rate, coverage],
+    () => project({ currentMonthly: current, deposit: pkg.deposit, payment: pkg.monthly, tenorMonths: tenor, coveragePct: coverage, escalationPct: 0, years: CHART_YEARS }),
+    [current, pkg, tenor, coverage],
   )
 
   useEffect(() => {
     onEstimate?.({
-      system: `${pkg.kw} kW + ${pkg.batteryKwh} kWh battery`,
+      system: pkg.name,
       currentMonthly: Math.round(current),
       solafiMonthly: Math.round(r.monthlyDuringLoan),
     })
@@ -139,9 +135,10 @@ export default function Calculator({ onEstimate }) {
         <fieldset>
           <legend>Pick a system</legend>
           <div className="pkg-pick" role="radiogroup" aria-label="System size">
-            {packages.map((p) => (
-              <button key={p.id} type="button" role="radio" aria-checked={pkgId === p.id} className={pkgId === p.id ? 'on' : ''} onClick={() => pickPkg(p.id)}>
-                {p.kw} kW
+            {products.map((p) => (
+              <button key={p.id} type="button" role="radio" aria-checked={pkg.id === p.id} className={pkg.id === p.id ? 'on' : ''} onClick={() => setPkgId(p.id)}>
+                <b>{p.name}</b>
+                <small>{[p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh`].filter(Boolean).join(' · ')}</small>
               </button>
             ))}
           </div>
@@ -157,15 +154,7 @@ export default function Calculator({ onEstimate }) {
                 <MoneyField label="Petrol per litre" value={petrol} onChange={setPetrol} />
               </div>
               <MoneyField label="Generator servicing per month" value={servicing} onChange={setServicing} max={100000} step={1000} />
-              <MoneyField label="System price, installed" value={price} onChange={setPrice} max={20000000} step={50000} />
-              <div className="field-row">
-                <NumField label="Deposit" value={depositPct} onChange={setDepositPct} max={90} step={5} unit="%" />
-                <NumField label="Pay over" value={tenor} onChange={setTenor} min={1} max={60} step={1} unit="months" />
-              </div>
-              <div className="field-row">
-                <NumField label="Interest per month" value={rate} onChange={setRate} max={10} step={0.1} unit="%" />
-                <NumField label="Spend solar replaces" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
-              </div>
+              <NumField label="Spend solar replaces" value={coverage} onChange={setCoverage} max={100} step={5} unit="%" />
             </div>
           )}
           {!termsAreFinal && (

@@ -22,23 +22,19 @@ export function monthlyPayment(principal, monthlyRatePct, tenorMonths) {
  * Staying as you are: grid bill + generator, every month, rising by
  * `escalationPct` once a year.
  *
- * With solar: deposit up front, the loan repayment for `tenorMonths`, plus the
+ * With solar: deposit up front, `payment` a month for `tenorMonths`, plus the
  * part of today's spend solar does not replace ((100 - coveragePct)%), which
  * rises the same way.
  */
 export function project({
   currentMonthly,
-  price,
-  depositPct,
+  deposit,
+  payment,
   tenorMonths,
-  monthlyRatePct,
   coveragePct,
   escalationPct = 0,
   years,
 }) {
-  const deposit = price * (depositPct / 100)
-  const principal = price - deposit
-  const payment = monthlyPayment(principal, monthlyRatePct, tenorMonths)
   const residualShare = 1 - coveragePct / 100
   const months = Math.round(years * 12)
 
@@ -59,10 +55,8 @@ export function project({
   const residualNow = currentMonthly * residualShare
   return {
     deposit,
-    principal,
     payment,
     totalRepaid: payment * tenorMonths,
-    interestPaid: payment * tenorMonths - principal,
     residualNow,
     monthlyDuringLoan: payment + residualNow,
     monthlyAfterLoan: residualNow,

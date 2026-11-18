@@ -27,8 +27,8 @@ test('amortised payment matches the annuity formula', () => {
 
 test('projection totals, break-even and savings', () => {
   const r = project({
-    currentMonthly: 200000, price: 2400000, depositPct: 50, tenorMonths: 12,
-    monthlyRatePct: 0, coveragePct: 100, escalationPct: 0, years: 2,
+    currentMonthly: 200000, deposit: 1200000, payment: 100000, tenorMonths: 12,
+    coveragePct: 100, escalationPct: 0, years: 2,
   })
   assert.equal(r.deposit, 1200000)
   assert.equal(r.payment, 100000)
@@ -42,8 +42,8 @@ test('projection totals, break-even and savings', () => {
 
 test('coverage below 100% leaves residual spend on the solar side', () => {
   const r = project({
-    currentMonthly: 100000, price: 1200000, depositPct: 0, tenorMonths: 12,
-    monthlyRatePct: 0, coveragePct: 80, escalationPct: 0, years: 1,
+    currentMonthly: 100000, deposit: 0, payment: 100000, tenorMonths: 12,
+    coveragePct: 80, escalationPct: 0, years: 1,
   })
   near(r.residualNow, 20000, 0.01)
   near(r.monthlyDuringLoan, 120000, 0.01)
@@ -54,8 +54,8 @@ test('coverage below 100% leaves residual spend on the solar side', () => {
 
 test('escalation applies from year two', () => {
   const r = project({
-    currentMonthly: 100000, price: 0, depositPct: 0, tenorMonths: 0,
-    monthlyRatePct: 0, coveragePct: 100, escalationPct: 10, years: 2,
+    currentMonthly: 100000, deposit: 0, payment: 0, tenorMonths: 0,
+    coveragePct: 100, escalationPct: 10, years: 2,
   })
   near(r.totalCurrent, 1200000 + 1320000)
 })

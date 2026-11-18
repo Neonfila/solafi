@@ -5,13 +5,13 @@ import StreetScene from '../components/StreetScene.jsx'
 import Calculator from '../components/Calculator.jsx'
 import PayTimeline from '../components/PayTimeline.jsx'
 import Waitlist from '../components/Waitlist.jsx'
-import { naira, nairaShort, monthlyPayment } from '../lib/calc.js'
-import { loanDefaults, packages } from '../lib/config.js'
+import { naira, nairaShort } from '../lib/calc.js'
+import { useProducts } from '../lib/products.js'
 
 
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
-  { q: 'What does each system run?', a: '3 kW: lights, fans, TV, fridge, laptops and Wi-Fi. 5 kW: all that plus a freezer, a pumping machine and one inverter AC. 10 kW: several ACs and shop or office equipment. We size it with you.' },
+  { q: 'Which system do I need?', a: 'Each system above lists what it runs. Tell us what you want to power and we size it with you.' },
   { q: 'Do I still need NEPA?', a: 'Keep it as a backup. Most people use far less of it and stop using the generator.' },
   { q: 'Where is Solafi available?', a: 'We are opening area by area. Join the waitlist and we will tell you when we reach you.' },
 ]
@@ -19,6 +19,7 @@ const faqs = [
 export default function Home() {
   const [estimate, setEstimate] = useState(null)
   const [openFaq, setOpenFaq] = useState(0)
+  const products = useProducts()
 
   return (
     <>
@@ -48,13 +49,17 @@ export default function Home() {
         <div className="wrap">
           <h2>Systems</h2>
           <ul className="plans">
-            {packages.map((p) => (
+            {products.map((p) => (
               <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
-                <p className="plan-size">{p.kw} kW<span>{p.batteryKwh} kWh battery</span></p>
-                <h3 className="plan-fit">{p.fits}</h3>
+                <div className="plan-size">
+                  <h3>{p.name}</h3>
+                  <span>{[p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
+                </div>
+                <p className="plan-fit">{p.runs}</p>
                 <p className="plan-price">
-                  <strong>{naira(monthlyPayment(p.price * (1 - loanDefaults.depositPct / 100), loanDefaults.monthlyRatePct, loanDefaults.tenorMonths))}<small>/month</small></strong>
-                  <span>{loanDefaults.tenorMonths} months</span><span>{nairaShort(p.price * loanDefaults.depositPct / 100)} deposit</span>
+                  <strong>{naira(p.monthly)}<small>/month</small></strong>
+                  <span>{p.months} months</span><span>{nairaShort(p.deposit)} deposit</span>
+                  <em>or {nairaShort(p.cashPrice)} paid in full</em>
                 </p>
               </li>
             ))}

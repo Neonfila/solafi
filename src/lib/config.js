@@ -23,6 +23,11 @@ export const waitlistEndpoint = 'https://script.google.com/macros/s/AKfycbyGS9V-
 // app URL (see tools/agreement-apps-script.gs). Empty = only /sign/#demo works.
 export const agreementEndpoint = 'https://script.google.com/macros/s/AKfycbxQ2QXgf_7qW1BZjfb2TYg1puxPQN9zoT7xf8zrYyn1tcSXnUHV70V8sviBFK3axhyhHA/exec'
 
+// Where the site reads its products and prices: the Google Apps Script web
+// app URL (see tools/products-apps-script.gs). Empty = the built-in copy in
+// src/lib/products.js.
+export const productsEndpoint = 'https://script.google.com/macros/s/AKfycbxf_RPSu9GBNK28KDQUbN9d8YjLtESsgjyI86UjJPox6gfn4MFiQ-pCvyAtVw5nH-UB/exec'
+
 // Public reference prices (looked up, not invented). Update when they move.
 export const reference = {
   petrolPerLitre: 1360,
@@ -51,39 +56,6 @@ export const generators = [
   { id: 'large', label: 'Large', size: '7.5 kVA', litresPerHour: 2.6 },
 ]
 
-// Packages, price installed.
-export const packages = [
-  {
-    id: 'p3',
-    kw: 3,
-    batteryKwh: 5,
-    price: 2500000,
-    fits: 'Flat or small home',
-  },
-  {
-    id: 'p5',
-    kw: 5,
-    batteryKwh: 10,
-    price: 4500000,
-    fits: 'Family home or small office',
-    featured: true,
-  },
-  {
-    id: 'p10',
-    kw: 10,
-    batteryKwh: 20,
-    price: 8500000,
-    fits: 'Large home or business',
-  },
-]
-
-// Loan terms.
-export const loanDefaults = {
-  depositPct: 30,
-  tenorMonths: 24,
-  monthlyRatePct: 2.5,
-}
-
 // Calculator starting values. Examples only; the visitor edits them.
 export const calcDefaults = {
   gridBill: 60000,
@@ -93,5 +65,4 @@ export const calcDefaults = {
   coveragePct: 85,
   escalationPct: 0,
   years: 10,
-  packageId: 'p5',
 }

@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { naira, nairaShort, monthlyPayment } from '../lib/calc.js'
-import { loanDefaults, packages } from '../lib/config.js'
+import { naira, nairaShort } from '../lib/calc.js'
+import { featuredOf, useProducts } from '../lib/products.js'
 
 // How it works, told with the real numbers of the most common plan:
 // a deposit, one mark per monthly payment, then the system is yours.
 // The months fill in once, the first time the timeline scrolls into view.
-const pkg = packages.find((p) => p.featured)
-const { depositPct, tenorMonths, monthlyRatePct } = loanDefaults
-const deposit = (pkg.price * depositPct) / 100
-const monthly = monthlyPayment(pkg.price - deposit, monthlyRatePct, tenorMonths)
-
 export default function PayTimeline() {
+  const pkg = featuredOf(useProducts())
+  const { deposit, monthly, months: tenorMonths } = pkg
   const ref = useRef(null)
   const [seen, setSeen] = useState(false)
 
@@ -34,7 +31,7 @@ export default function PayTimeline() {
       </li>
       <li>
         <span className="track-mark"><i className="track-dot" /></span>
-        <h3>We install a {pkg.kw} kW system</h3>
+        <h3>We install {pkg.name}</h3>
         <p><b>{nairaShort(deposit)}</b> deposit</p>
       </li>
       <li className="track-months">
