@@ -60,7 +60,10 @@ function load() {
   if (!productsEndpoint) return Promise.resolve(null)
   request ||= fetch(productsEndpoint)
     .then((r) => r.json())
-    .then((out) => (out.ok && valid(out.products) ? (live = prepareProducts(out.products)) : null))
+    // only rows that also have a Product Specification row are real products;
+    // working rows in the overview tab (e.g. one customer's special terms) are skipped
+    .then((out) => (out.ok ? out.products.filter((r) => String(r.summary || '').trim()) : []))
+    .then((rows) => (valid(rows) ? (live = prepareProducts(rows)) : null))
     .catch(() => null)
   return request
 }
