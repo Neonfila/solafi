@@ -51,7 +51,9 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
             <tr><td className="k">Deposit ({d.depositPct}%)</td><td className="big">{money(d.deposit)}</td><td>Before installation</td></tr>
             <tr><td className="k">Plan Charge</td><td>{money(d.planCharge)}</td><td>Included in the monthly payments</td></tr>
             <tr className="ag-total"><td className="k">Total Payable</td><td className="big">{money(d.total)}</td><td>Deposit + {d.months} monthly payments</td></tr>
-            <tr><td className="k">Monthly Payment</td><td><span className="big">{money(d.regular)}</span> × {d.months}{d.last !== d.regular && <> (payment {d.months}: {money(d.last)})</>}</td><td>Monthly from the handover date</td></tr>
+            <tr><td className="k">Monthly Payment</td><td>{d.last === d.regular
+                ? <><span className="big">{money(d.regular)}</span> × {d.months}</>
+                : <><span className="big">{money(d.regular)}</span> × {d.months - 1}, then {money(d.last)} for payment {d.months}</>}</td><td>Monthly from the handover date</td></tr>
             {d.schedule.map((p) => (
               <tr key={p.n} className="ag-pay"><td>Payment {p.n}</td><td>{money(p.amount)}</td><td>{p.due}</td></tr>
             ))}
