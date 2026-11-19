@@ -57,13 +57,13 @@ export default function Home() {
       <section id="packages" className="section">
         <div className="wrap">
           <h2>Solar packages</h2>
-          <p className="section-lede">Every price includes installation. Pay {depositPct}% first, then monthly for {main.months} months.</p>
+          <p className="section-lede">Every price includes installation and maintenance. Pay {depositPct}% first, then monthly for {main.months} months.</p>
           <ul className="plans">
             {products.map((p) => (
               <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
                 <div className="plan-size">
                   <h3>{p.name}</h3>
-                  <span>{[p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
+                  <span>{[p.kva && `${p.kva} kVA inverter`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
                 </div>
                 <p className="plan-fit"><b>Powers:</b> {p.runs}</p>
                 <p className="plan-price">
