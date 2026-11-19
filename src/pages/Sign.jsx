@@ -59,6 +59,7 @@ export default function Sign() {
   const [files, setFiles] = useState({ id: null, proof: null })
   const [signature, setSignature] = useState(null)
   const [agree, setAgree] = useState(false)
+  const [remote, setRemote] = useState(false)
   const [problem, setProblem] = useState('')
   const [signed, setSigned] = useState(null)
   const [demo, setDemo] = useState(false)
@@ -106,12 +107,13 @@ export default function Sign() {
     if (!files.id) missing.push('a copy of your ID')
     if (!files.proof) missing.push('your utility bill or tenancy proof')
     if (!signature) missing.push('your signature')
+    if (!remote) missing.push('the remote monitoring tick box')
     if (!agree) missing.push('the agreement tick box')
     if (missing.length) return setProblem(`Still needed: ${missing.join(', ')}.`)
     setProblem('')
     setState('sending')
 
-    const record = { ...f, date: today(), signature }
+    const record = { ...f, date: today(), signature, remoteConsent: remote }
     // the exact text the client read, so the signature is tied to these words
     const text = agreementRef.current.innerText
     try {
@@ -120,6 +122,7 @@ export default function Sign() {
         token,
         ...f,
         signature,
+        remoteConsent: remote,
         files: { id: await readFile(files.id), proof: await readFile(files.proof) },
         termsVersion: TERMS_VERSION,
         text,
@@ -182,7 +185,7 @@ export default function Sign() {
     <section className="section sign-page">
       <div className="wrap">
         {demo && <p className="preview-note sign-demo">Sample agreement</p>}
-        <Agreement d={d} customer={{ name: f.fullName, phone: f.phone, address: f.address }} ref={agreementRef} />
+        <Agreement d={d} customer={{ name: f.fullName, phone: f.phone, address: f.address, remoteConsent: remote }} ref={agreementRef} />
 
         <form className="sign-form" onSubmit={submit}>
           <h2>Your details</h2>
@@ -218,6 +221,10 @@ export default function Sign() {
 
           <h2>Signature</h2>
           <SignaturePad onChange={setSignature} disabled={state === 'sending'} />
+          <label className="sign-agree">
+            <input type="checkbox" checked={remote} onChange={(e) => setRemote(e.target.checked)} />
+            <span>I agree to remote monitoring and remote switch-off as described above.</span>
+          </label>
           <label className="sign-agree">
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
             <span>I have read this agreement and agree to its terms. My name and drawn signature above are my signature.</span>

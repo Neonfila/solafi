@@ -456,6 +456,11 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .agreement td.c { color: var(--muted); text-align: center; }
 .agreement .big { font-weight: 700; font-size: 1rem; font-variant-numeric: tabular-nums; }
 .agreement .ag-money { min-width: 0; }
+.ag-box-title { margin-top: 1.4rem; }
+.agreement tr.ag-total td { border-top: 2px solid var(--line-2); }
+.agreement tr.ag-pay td { color: var(--muted); padding-top: 0.35rem; padding-bottom: 0.35rem; }
+.ag-consent { margin: 0.8rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line-2); border-radius: 12px; font-weight: 700; }
+.ag-box { font-size: 1.1rem; margin-right: 0.3rem; }
 .ag-account { margin: 0.9rem 0; padding: 0.9rem 1rem; border: 1px solid var(--sun); border-radius: 12px; }
 .ag-account dl { display: flex; flex-wrap: wrap; gap: 0.6rem 2rem; margin: 0; }
 .ag-account dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
@@ -500,6 +505,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .sigpad button { position: absolute; right: 0.6rem; top: 0.6rem; padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.82rem; color: #0E1A14; background: #EEF0EC; }
 .sigpad button:disabled { opacity: 0; pointer-events: none; }
 .sign-agree { display: flex; gap: 0.7rem; align-items: flex-start; font-size: 0.92rem; cursor: pointer; }
+.sign-agree + .sign-agree { margin-top: 0.8rem; }
 .sign-agree input { width: 20px; height: 20px; margin-top: 0.15rem; flex: none; }
 .sign-done { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
 .sign-done > div { flex: 1; min-width: 12rem; }

@@ -16,6 +16,7 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
   const address = (signed?.address || customer?.address || '').trim()
   const d = { ...row, address, addressShort: address.replace(/\s+State$/i, '') }
   const c = clauses(d)
+  const consent = signed ? signed.remoteConsent : customer?.remoteConsent
   const blank = (v) => (v ? <span className="ag-filled">{v}</span> : <span className="ag-fill" />)
   return (
     <article className="agreement" ref={ref}>
@@ -41,6 +42,23 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
         </table>
       </div>
 
+      <h3 className="ag-box-title">PAYMENT SUMMARY</h3>
+      <div className="ag-scroll">
+        <table className="ag-money">
+          <thead><tr><th>Item</th><th>Amount</th><th>Due Date</th></tr></thead>
+          <tbody>
+            <tr><td className="k">System Price</td><td>{money(d.cashPrice)}</td><td>—</td></tr>
+            <tr><td className="k">Deposit ({d.depositPct}%)</td><td className="big">{money(d.deposit)}</td><td>Before installation</td></tr>
+            <tr><td className="k">Plan Charge</td><td>{money(d.planCharge)}</td><td>Included in the monthly payments</td></tr>
+            <tr className="ag-total"><td className="k">Total Payable</td><td className="big">{money(d.total)}</td><td>Deposit + {d.months} monthly payments</td></tr>
+            <tr><td className="k">Monthly Payment</td><td><span className="big">{money(d.regular)}</span> × {d.months}{d.last !== d.regular && <> (payment {d.months}: {money(d.last)})</>}</td><td>Monthly from the handover date</td></tr>
+            {d.schedule.map((p) => (
+              <tr key={p.n} className="ag-pay"><td>Payment {p.n}</td><td>{money(p.amount)}</td><td>{p.due}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <h2>1. SYSTEM SPECIFICATIONS, WARRANTIES &amp; INSTALLATION (SCHEDULE A)</h2>
       <Clauses items={c.s1.slice(0, 1)} />
       <div className="ag-scroll">
@@ -54,6 +72,16 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
         </table>
       </div>
       <Clauses items={c.s1.slice(1)} />
+      <div className="ag-scroll">
+        <table className="ag-money">
+          <thead><tr><th>Installation Record (completed on installation day)</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td className="k">Handover Date</td><td>{blank(d.handoverDate)}</td></tr>
+            <tr><td className="k">Inverter Serial Number</td><td>{blank(d.inverterSerial)}</td></tr>
+            <tr><td className="k">Battery Serial Number</td><td>{blank(d.batterySerial)}</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>2. PRICE, REPAYMENT PLAN &amp; DEFAULT RULES (SCHEDULE B)</h2>
       <Clauses items={c.s2a} />
@@ -65,18 +93,6 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
           <div><dt>Bank</dt><dd>{d.bankName}</dd></div>
         </dl>
       </div>
-      <div className="ag-scroll">
-        <table className="ag-money">
-          <thead><tr><th>Financial Term</th><th>Contract Value / Rule</th></tr></thead>
-          <tbody>
-            <tr><td className="k">System Cash Price</td><td>{money(d.cashPrice)}</td></tr>
-            <tr><td className="k">Initial Deposit (Upfront)</td><td className="big">{money(d.deposit)}</td></tr>
-            <tr><td className="k">Monthly Instalment</td><td><span className="big">{money(d.monthly)}</span> / month (for {d.months} Months)</td></tr>
-            <tr><td className="k">Total {d.months}-Month Plan Value</td><td>{money(d.total)} (Financed Bal: {money(d.instalments)})</td></tr>
-            <tr><td className="k">First Payment Due</td><td>Exactly 30 Days after Handover Date</td></tr>
-          </tbody>
-        </table>
-      </div>
       <Clauses items={c.s2b} />
       <div className="ag-scroll">
         <table className="ag-stages">
@@ -84,6 +100,7 @@ const Agreement = forwardRef(function Agreement({ d: row, signed, customer }, re
           <tbody>{DEFAULT_STAGES.map((r) => <tr key={r[0]}><td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td></tr>)}</tbody>
         </table>
       </div>
+      <p className="ag-consent"><span className="ag-box">{consent ? '☑' : '☐'}</span> I agree to remote monitoring and remote switch-off as described above.</p>
 
       <h2>3. PERMITTED APPLIANCES &amp; LOAD RESTRICTIONS (SCHEDULE C)</h2>
       <Clauses items={c.s3} />
