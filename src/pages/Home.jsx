@@ -9,6 +9,20 @@ import { naira, nairaShort } from '../lib/calc.js'
 import { featuredOf, useProducts } from '../lib/products.js'
 
 
+// Photos of systems the team has installed, logo added (public/installs).
+const installs = [
+  ['install-01', 'Solar panels on a dark tiled roof'],
+  ['install-02', 'Four inverters and batteries in a stairwell'],
+  ['install-03', 'Solar panels on a metal roof'],
+  ['install-04', 'Installers fitting panels on a roof'],
+  ['install-05', 'Inverter and battery on a wall'],
+  ['install-06', 'Lithium battery and inverter on a tiled wall'],
+  ['install-07', 'Inverter above a lithium battery'],
+  ['install-08', 'Inverter with two batteries under the stairs'],
+  ['install-09', 'Inverter and wall battery in a side passage'],
+  ['install-10', 'Rows of panels on a roof'],
+]
+
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
   { q: 'Which package do I need?', a: 'Each package above lists what it powers. Tell us what you want to run and we help you pick.' },
@@ -74,6 +88,20 @@ export default function Home() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      <section id="installs" className="section">
+        <div className="wrap">
+          <h2>Systems we have installed</h2>
+          <p className="section-lede">Panels, inverters and batteries our team has put in homes and shops.</p>
+        </div>
+        <div className="installs" tabIndex={0} aria-label="Photos of installed systems">
+          {installs.map(([file, alt]) => (
+            <a key={file} href={`/installs/${file}.jpg`} target="_blank" rel="noreferrer">
+              <img src={`/installs/${file}.jpg`} alt={alt} loading="lazy" decoding="async" />
+            </a>
+          ))}
         </div>
       </section>
 
