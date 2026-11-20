@@ -1,9 +1,11 @@
-# Builds the Vite site and publishes dist/ to GitHub Pages on every push to main.
+# Builds the Vite site and publishes dist/ to GitHub Pages.
+# The live site always comes from main. A preview branch, if one exists, is
+# built into solafi.ng/try/ so new work can be seen before it goes live.
 name: Deploy site to Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, find-my-package]
   workflow_dispatch:
 
 permissions:
@@ -23,6 +25,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -30,6 +34,22 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      # Preview: the find-my-package branch at solafi.ng/try/, hidden from search
+      # engines. Remove these two steps once the branch is merged or dropped.
+      - uses: actions/checkout@v4
+        with:
+          ref: find-my-package
+          path: try-src
+      - name: Build the preview at /try/
+        working-directory: try-src
+        run: |
+          npm ci
+          npm run build
+          sed -i 's#<head>#<head><meta name="robots" content="noindex" />#' dist/index.html
+          for p in build about; do mkdir -p dist/$p && cp dist/index.html dist/$p/index.html; done
+          mv dist ../dist/try
+        env:
+          VITE_BASE: /try/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
