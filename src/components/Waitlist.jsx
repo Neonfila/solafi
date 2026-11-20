@@ -34,7 +34,7 @@ export default function Waitlist({ estimate }) {
     if (estimate) Object.assign(data, estimate)
     if (build) {
       // the sheet has no Appliances column yet, so the list rides in System too
-      data.system = `${build.system} (Build your home: ${build.appliances || 'nothing added'})`
+      data.system = `${build.system} (Find my package: ${build.appliances || 'nothing added'})`
       data.appliances = build.appliances
     }
     if (!ENDPOINT) {
@@ -95,7 +95,7 @@ export default function Waitlist({ estimate }) {
       </label>
       {build && (
         <p className="estimate-chip">
-          Sends your home: {build.system}{build.appliances ? ` · ${build.appliances}` : ''}.{' '}
+          Sends your list: {build.system}{build.appliances ? ` · ${build.appliances}` : ''}.{' '}
           <button type="button" className="chip-undo" onClick={() => { forgetBuild(); setBuild(null) }}>Remove</button>
         </p>
       )}

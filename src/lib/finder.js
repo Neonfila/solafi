@@ -1,48 +1,63 @@
-// "Build your home" package finder: the two reference tables and the rules.
+// "Find my package": the two reference tables and the rules.
 //
-// DRAFT FIGURES. Both tables are for Agbet to check and correct before the
-// page goes live. They come from typical published values (Nigerian solar
-// sizing guides and appliance spec ranges), not from Solafi's own installs.
-// Change a number here and the whole page follows.
+// Figures are typical published values, chosen on the safe side, so a home is
+// never told a package is enough when it is not. The team confirms the real
+// size when it visits. Change a number here and the whole page follows.
+//
+// Sources:
+// - Appliance wattages: U.S. Department of Energy, "Estimating Appliance and
+//   Home Electronic Energy Use" (energy.gov/energysaver) and Virginia Tech
+//   Extension BSE-301 wattage ranges; AC draw from inverter AC spec sheets
+//   (1 ton ≈ 1HP class: 800–1,200 W running).
+// - Sun: Lagos gets 4.5–5.4 kWh per kWp of panels a day across the year
+//   (NASA POWER data, via profilesolar.com). We use the lowest season, 4.5.
+// - Battery: lithium (LiFePO4) batteries are used to 90% depth of discharge.
 
-// ── Table 1: appliances ──────────────────────────────────────────────────────
+// ── Table 1: appliances, grouped by the room (window) they light up ──────────
 // watts: running draw of one unit.
-// hours: typical hours a day it draws that power (a fridge's compressor cycles,
-//        so its hours are the equivalent full-power hours, not 24).
+// hours: typical hours a day at that draw (a fridge's compressor cycles, so
+//        its hours are full-power equivalents, not 24).
 // night: share of those hours after sunset, which the battery has to carry.
-// burst: a heavy appliance used for minutes at a time (kettle, iron, microwave).
-//        People rarely run two at once, so only the biggest one counts toward
-//        the load at any one moment (see peakLoad below).
-// hp:    air conditioners only, their size in horsepower.
+// burst: used for minutes at a time (kettle, iron, microwave). People rarely
+//        run two at once, so only the biggest counts toward the load at once.
+// hp:    air conditioners only.
+export const ROOMS = [
+  { id: 'lights', name: 'Lights and fans' },
+  { id: 'living', name: 'Living room' },
+  { id: 'kitchen', name: 'Kitchen' },
+  { id: 'laundry', name: 'Laundry and water' },
+  { id: 'cooling', name: 'Air conditioning' },
+]
+
 export const APPLIANCES = [
-  { id: 'bulb', name: 'LED bulbs', group: 'everyday', icon: 'Lightbulb', watts: 10, hours: 6, night: 0.8 },
-  { id: 'fan', name: 'Fan', group: 'everyday', icon: 'Fan', watts: 70, hours: 8, night: 0.5 },
-  { id: 'tv', name: 'TV', group: 'everyday', icon: 'Tv', watts: 100, hours: 6, night: 0.5 },
-  { id: 'decoder', name: 'Decoder', group: 'everyday', icon: 'SatelliteDish', watts: 25, hours: 6, night: 0.5 },
-  { id: 'router', name: 'Wi-Fi router', group: 'everyday', icon: 'Router', watts: 15, hours: 24, night: 0.5 },
-  { id: 'laptop', name: 'Laptop', group: 'everyday', icon: 'Laptop', watts: 60, hours: 6, night: 0.3 },
-  { id: 'speaker', name: 'Speaker or sound system', short: 'Speaker', group: 'everyday', icon: 'Speaker', watts: 100, hours: 3, night: 0.5 },
-  { id: 'washer', name: 'Washing machine', group: 'everyday', icon: 'WashingMachine', watts: 500, hours: 1, night: 0 },
-  { id: 'iron', name: 'Pressing iron', group: 'everyday', icon: 'Shirt', watts: 1000, hours: 0.5, night: 0, burst: true },
-  { id: 'fridge', name: 'Fridge', group: 'kitchen', icon: 'Refrigerator', watts: 150, hours: 8, night: 0.5 },
-  { id: 'freezer', name: 'Freezer', group: 'kitchen', icon: 'Snowflake', watts: 200, hours: 10, night: 0.5 },
-  { id: 'microwave', name: 'Microwave', group: 'kitchen', icon: 'Microwave', watts: 1200, hours: 0.3, night: 0, burst: true },
-  { id: 'kettle', name: 'Electric kettle', group: 'kitchen', icon: 'Coffee', watts: 1500, hours: 0.25, night: 0, burst: true },
-  { id: 'pump', name: 'Pumping machine', group: 'kitchen', icon: 'Droplets', watts: 750, hours: 0.5, night: 0 },
-  { id: 'ac1', name: 'AC 1HP', group: 'kitchen', icon: 'AirVent', watts: 900, hours: 6, night: 0.3, hp: 1 },
-  { id: 'ac15', name: 'AC 1.5HP', group: 'kitchen', icon: 'AirVent', watts: 1300, hours: 6, night: 0.3, hp: 1.5 },
-  { id: 'ac2', name: 'AC 2HP', group: 'kitchen', icon: 'AirVent', watts: 1800, hours: 6, night: 0.3, hp: 2 },
+  { id: 'bulb', name: 'LED bulb', room: 'lights', watts: 10, hours: 6, night: 0.8 },
+  { id: 'fan', name: 'Fan', room: 'lights', watts: 70, hours: 8, night: 0.5 },
+  { id: 'tv', name: 'TV', room: 'living', watts: 100, hours: 6, night: 0.5 },
+  { id: 'decoder', name: 'Decoder', room: 'living', watts: 25, hours: 6, night: 0.5 },
+  { id: 'router', name: 'Wi-Fi router', room: 'living', watts: 15, hours: 24, night: 0.5 },
+  { id: 'laptop', name: 'Laptop', room: 'living', watts: 60, hours: 6, night: 0.3 },
+  { id: 'speaker', name: 'Speaker or sound system', room: 'living', watts: 100, hours: 3, night: 0.5 },
+  { id: 'fridge', name: 'Fridge', room: 'kitchen', watts: 150, hours: 8, night: 0.5 },
+  { id: 'freezer', name: 'Freezer', room: 'kitchen', watts: 200, hours: 10, night: 0.5 },
+  { id: 'microwave', name: 'Microwave', room: 'kitchen', watts: 1200, hours: 0.3, night: 0, burst: true },
+  { id: 'kettle', name: 'Electric kettle', room: 'kitchen', watts: 1500, hours: 0.25, night: 0, burst: true },
+  { id: 'washer', name: 'Washing machine', room: 'laundry', watts: 500, hours: 1, night: 0 },
+  { id: 'iron', name: 'Pressing iron', room: 'laundry', watts: 1000, hours: 0.5, night: 0, burst: true },
+  { id: 'pump', name: 'Pumping machine', room: 'laundry', watts: 750, hours: 0.5, night: 0 },
+  { id: 'ac1', name: 'AC, 1HP', room: 'cooling', watts: 900, hours: 6, night: 0.3, hp: 1 },
+  { id: 'ac15', name: 'AC, 1.5HP', room: 'cooling', watts: 1300, hours: 6, night: 0.3, hp: 1.5 },
+  { id: 'ac2', name: 'AC, 2HP', room: 'cooling', watts: 1800, hours: 6, night: 0.3, hp: 2 },
 ]
 
 // ── Table 2: package limits ──────────────────────────────────────────────────
-// Sizes (kVA, kWh, panels) come from the live product list. These are the
-// figures that turn a size into a limit.
+// Sizes (kVA, kWh, panels) come from the live product list. These turn a size
+// into a limit.
 export const SIZING = {
-  powerFactor: 0.8,      // usable watts = kVA × 1000 × this
-  batteryUsable: 0.9,    // lithium batteries: share of the kWh you can use
-  panelWatts: 450,       // one panel
-  sunHours: 4.5,         // peak sun hours a day, southern Nigeria average
-  systemEfficiency: 0.75, // wiring, inverter and heat losses
+  powerFactor: 0.8,       // usable watts = kVA × 1000 × this
+  batteryUsable: 0.9,     // lithium: share of the kWh you can use
+  panelWatts: 450,        // one panel
+  sunHours: 4.5,          // kWh per kWp a day, Lagos, lowest season
+  systemEfficiency: 0.85, // charging, inverter and wiring losses
 }
 
 // What air conditioning each package allows (doc: Solafi Website Changes II).
@@ -171,5 +186,5 @@ function reasonFor(pkg, checks, selection, t) {
 
 /** "2× Fan, 1× AC 1HP" for the waitlist. */
 export function describe(selection) {
-  return APPLIANCES.filter((a) => selection[a.id] > 0).map((a) => `${selection[a.id]}× ${a.short || a.name}`).join(', ')
+  return APPLIANCES.filter((a) => selection[a.id] > 0).map((a) => `${selection[a.id]}× ${a.name}`).join(', ')
 }

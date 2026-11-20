@@ -31,7 +31,7 @@ const specOf = (p) => [p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh}
 
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
-  { q: 'Which package do I need?', a: <>Each package above lists what it powers. Or <Link to="/build">build your home</Link>: put in what you want to run and we show the package that fits.</> },
+  { q: 'Which package do I need?', a: <>Each package above lists what it powers. Or use <Link to="/build">Find my package</Link>: list what you want to run and it shows the package that fits.</> },
   { q: 'What do kVA and kWh mean?', a: 'kVA is how much the inverter can carry at the same time: more kVA, more appliances on together. kWh is how much the battery stores: more kWh, more hours of light at night.' },
   { q: 'Who owns the system while I am paying?', a: 'Solafi does, until your last payment. Then it is fully yours.' },
   { q: 'How do I pay?', a: 'By bank transfer into the Solafi account written in your agreement. Never pay cash to an installer or any staff.' },
@@ -57,7 +57,7 @@ export default function Home() {
           </div>
           <div className="hero-actions">
             <Link to="/#calculator" className="btn btn--sun">See what you would save <ArrowRight size={18} /></Link>
-            <Link to="/build" className="btn btn--ghost">Not sure which package? Build your home</Link>
+            <Link to="/build" className="btn btn--ghost">Not sure which package? Find yours</Link>
           </div>
         </div>
         <StreetScene />
@@ -80,7 +80,7 @@ export default function Home() {
       <section id="packages" className="section">
         <div className="wrap">
           <h2>Solar packages</h2>
-          <p className="section-lede">Every price includes installation and maintenance. Pay {depositPct}% first, then monthly for {main.months} months. Not sure which one? <Link to="/build">Build your home</Link> and we will show you.</p>
+          <p className="section-lede">Every price includes installation and maintenance. Pay {depositPct}% first, then monthly for {main.months} months. Not sure which one? <Link to="/build">Find my package</Link> shows you.</p>
           <div className="plans-head" aria-hidden="true">
             <span>Package</span><span>What it powers</span><span>Monthly</span>
           </div>

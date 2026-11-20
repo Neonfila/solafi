@@ -54,5 +54,5 @@ test('only the biggest short-burst appliance counts toward the load at once', ()
 })
 
 test('describe lists the selection for the waitlist', () => {
-  assert.equal(describe({ fan: 2, ac1: 1, tv: 0 }), '2× Fan, 1× AC 1HP')
+  assert.equal(describe({ fan: 2, ac1: 1, tv: 0 }), '2× Fan, 1× AC, 1HP')
 })
