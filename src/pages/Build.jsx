@@ -69,7 +69,7 @@ function lineAt(h, drain) {
   return drain >= 1 ? 'The battery runs out before sunrise.' : `By sunrise, about ${Math.round((1 - drain) * 100)}% is still in the battery.`
 }
 
-function House({ lit, panels, drain, active }) {
+function House({ lit, panels, drain, active, mini = false }) {
   const svg = useRef(null)
   const sun = useRef(null)
   const clock = useRef(null)
@@ -98,6 +98,7 @@ function House({ lit, panels, drain, active }) {
       el.style.setProperty('--lvl', level.toFixed(3))
       el.toggleAttribute('data-low', active && level < 0.15)
       sun.current.setAttribute('transform', `translate(${(22 + 256 * d).toFixed(1)} ${(118 - 92 * Math.sin(Math.PI * d)).toFixed(1)})`)
+      if (!line.current) return // the small house has no caption
       const h = hourAt(t)
       clock.current.textContent = active ? clockOf(h) : ''
       const words = active ? lineAt(h, drain) : 'Add something to see a day with your package.'
@@ -110,6 +111,7 @@ function House({ lit, panels, drain, active }) {
     if (reducedMotion()) {
       // no loop: an afternoon, and the night told in words
       paint(0.3)
+      if (!line.current) return
       line.current.textContent = active ? `${lineAt(12, drain)} ${lineAt(4, drain)}` : line.current.textContent
       clock.current.textContent = ''
       return
@@ -132,8 +134,8 @@ function House({ lit, panels, drain, active }) {
   }, [drain, active])
 
   return (
-    <div className="fh-scene">
-      <svg ref={svg} viewBox="0 0 300 260" className="fh" style={{ '--has': active ? 1 : 0, '--from': from.current }} role="img" aria-label={`A house with ${panels} solar panels on the roof, through a day and a night.`}>
+    <div className={mini ? 'fh-scene fh-scene--mini' : 'fh-scene'}>
+      <svg ref={svg} viewBox="0 0 300 260" className="fh" style={{ '--has': active ? 1 : 0, '--from': from.current }} {...(mini ? { 'aria-hidden': true } : { role: 'img', 'aria-label': `A house with ${panels} solar panels on the roof, through a day and a night.` })}>
         <defs>
           <mask id={mask}>
             <circle cx="62" cy="40" r="10" fill="#fff" />
@@ -170,7 +172,7 @@ function House({ lit, panels, drain, active }) {
         <path d="M236 124 L249 131 V194" className="fh-flow fh-flow--sun" />
         <path d="M240 216 H224" className="fh-flow fh-flow--night" />
       </svg>
-      <p className="fh-cap" aria-hidden="true"><b ref={clock} /><span ref={line} /></p>
+      {!mini && <p className="fh-cap" aria-hidden="true"><b ref={clock} /><span ref={line} /></p>}
     </div>
   )
 }
@@ -267,6 +269,10 @@ export default function Build() {
         <div className="find-list">
           <h1>What do you want to power?</h1>
           <p className="find-lede">Add what you use at home or in your shop. We show the smallest package that runs it.</p>
+          {/* phone: the house sits here, at the top of the list */}
+          <div className="find-top">
+            <House lit={lit} panels={panels} drain={drain} active={!empty} />
+          </div>
 
           {ROOMS.map((room) => (
             <div key={room.id} className="fl-room">
@@ -302,8 +308,9 @@ export default function Build() {
       {/* phone: the answer stays at the bottom of the screen */}
       <div className={`find-dock${open ? ' open' : ''}`}>
         <button type="button" className="find-dock-bar" aria-expanded={open} onClick={() => setOpen(!open)}>
-          <span><small>{empty ? 'Our smallest package' : 'Your package'}{moved}</small><b key={pkg.id}>{pkg.name}</b></span>
-          <span className="find-dock-price">{naira(Math.round(monthly))}<small>/month</small></span>
+          <House lit={lit} panels={panels} drain={drain} active={!empty} mini />
+          <span className="find-dock-name"><small>{moved || (empty ? 'Our smallest package' : 'Your package')}</small><b key={pkg.id}>{pkg.name}</b></span>
+          <span className="find-dock-price">{nairaShort(Math.round(monthly))}<small>/mo</small></span>
           <ChevronUp size={20} className="find-dock-chev" />
         </button>
         <div className="find-dock-sheet">

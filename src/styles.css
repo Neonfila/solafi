@@ -671,18 +671,25 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .fa-link { padding: 0; color: var(--cream); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-2); }
 .fa-link:hover { text-decoration-color: var(--cream); }
 .fa-note { margin-top: 1.2rem; font-size: 0.82rem; color: var(--muted); }
-.find-dock { display: none; }
+.find-dock, .find-top { display: none; }
 
 @media (max-width: 860px) {
   .find { padding-bottom: 7rem; }
   .find-grid { grid-template-columns: minmax(0, 1fr); }
   .find-answer { display: none; }
+  .find-top { display: block; margin-top: 1.6rem; }
+  .find-top .fh { max-width: 420px; }
+  .fh-scene--mini { flex: none; width: 54px; }
+  .fh-scene--mini .fh { border-radius: 8px; }
+  .find-dock.open .fh-scene--mini { display: none; }
   .find-dock { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--ink-2); border-top: 1px solid var(--line-2); border-radius: 20px 20px 0 0; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.22); padding-bottom: env(safe-area-inset-bottom); }
-  .find-dock-bar { display: flex; align-items: center; gap: 0.8rem; width: 100%; padding: 0.85rem 20px; text-align: left; }
-  .find-dock-bar > span:first-child { display: grid; flex: 1; line-height: 1.15; }
+  .find-dock-bar { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 16px; text-align: left; }
+  .find-dock-name { display: grid; flex: 1; min-width: 0; line-height: 1.15; }
+  .find-dock-name .fa-move { justify-self: start; margin: 0; white-space: nowrap; }
+  .find-dock-name small { display: grid; }
   .find-dock-bar small { font-size: 0.75rem; color: var(--muted); }
-  .find-dock-bar b { font-family: var(--display); font-size: 1.35rem; color: var(--sun); animation: rise 380ms var(--ease); }
-  .find-dock-price { font-family: var(--display); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .find-dock-bar b { font-family: var(--display); font-size: 1.2rem; color: var(--sun); animation: rise 380ms var(--ease); }
+  .find-dock-price { flex: none; font-family: var(--display); font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
   .find-dock-price small { font-family: var(--body); font-weight: 400; font-size: 0.8rem; color: var(--muted); }
   .find-dock-chev { color: var(--muted); transition: transform 300ms var(--ease); }
   .find-dock.open .find-dock-chev { transform: rotate(180deg); }
@@ -694,6 +701,11 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .find-dock .fa-body { padding-top: 0.6rem; }
   .find-dock .fa-label, .find-dock .fa-name, .find-dock .fa-spec, .find-dock .fa-price { display: none; }
   .find-dock .fa-why { margin-top: 0; }
+}
+@media (max-width: 400px) {
+  .find-dock-bar { gap: 0.6rem; }
+  .find-dock-bar b { font-size: 1.1rem; }
+  .fh-scene--mini { width: 46px; }
 }
 @media (max-width: 560px) {
   .fl-room li { gap: 0.6rem; }
