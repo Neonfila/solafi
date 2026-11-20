@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { naira, nairaShort } from '../lib/calc.js'
-import { featuredOf, useProducts } from '../lib/products.js'
 
-// How it works, told with the real numbers of the most common plan:
-// a deposit, one mark per monthly payment, then the system is yours.
-// The months fill in once, the first time the timeline scrolls into view.
+// How it works: four fixed steps on one rail, one mark per monthly payment.
+// Fixed text on purpose: it never shows a package, deposit or monthly amount,
+// so it does not follow the calculator.
+const MONTHS = 12
+
 export default function PayTimeline() {
-  const pkg = featuredOf(useProducts())
-  const { deposit, monthly, months: tenorMonths } = pkg
   const ref = useRef(null)
   const [seen, setSeen] = useState(false)
 
@@ -23,28 +21,28 @@ export default function PayTimeline() {
   }, [])
 
   return (
-    <ol ref={ref} className={`track${seen ? ' track--in' : ''}`} style={{ '--n': tenorMonths }}>
+    <ol ref={ref} className={`track${seen ? ' track--in' : ''}`} style={{ '--n': MONTHS }}>
       <li>
         <span className="track-mark"><i className="track-dot" /></span>
         <h3>Tell us what you want to power</h3>
-        <p>Today</p>
+        <p>We check your home or shop and recommend a package.</p>
       </li>
       <li>
         <span className="track-mark"><i className="track-dot" /></span>
-        <h3>We install {pkg.name}</h3>
-        <p><b>{nairaShort(deposit)}</b> deposit</p>
+        <h3>Pay your deposit</h3>
+        <p>30% of the system price. Sign your plan online, then we install.</p>
       </li>
       <li className="track-months">
         <span className="track-mark">
-          {Array.from({ length: tenorMonths }, (_, i) => <i key={i} style={{ '--i': i }} />)}
+          {Array.from({ length: MONTHS }, (_, i) => <i key={i} style={{ '--i': i }} />)}
         </span>
-        <h3>You pay monthly</h3>
-        <p><b>{naira(monthly)}</b> × {tenorMonths}</p>
+        <h3>Pay small-small monthly</h3>
+        <p>Fixed payments for 12 months. We monitor your system remotely.</p>
       </li>
       <li className="track-end">
         <span className="track-mark"><i className="track-dot" /></span>
         <h3>Then it is yours</h3>
-        <p>No more payments</p>
+        <p>No more payments.</p>
       </li>
     </ol>
   )

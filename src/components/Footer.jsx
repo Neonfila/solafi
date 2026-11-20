@@ -21,8 +21,9 @@ export default function Footer() {
       </div>
       <div className="wrap footer-base">
         <span>© {new Date().getFullYear()} {brand.name} · {brand.domain}</span>
-        <span>Calculator figures are estimates, not a loan offer.</span>
+        <span>Calculator figures are estimates, not a final quote.</span>
         <span className="footer-credit">Website by <a href="https://neonfila.com" target="_blank" rel="noreferrer"><NeonMark size={14} glow={false} />NeonFila</a></span>
+        <span className="footer-legal">{brand.name} is a product of SolaFi Technology Limited · RC 10013740</span>
       </div>
     </footer>
   )

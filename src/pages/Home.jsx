@@ -72,6 +72,9 @@ export default function Home() {
         <div className="wrap">
           <h2>Solar packages</h2>
           <p className="section-lede">Every price includes installation and maintenance. Pay {depositPct}% first, then monthly for {main.months} months.</p>
+          <div className="plans-head" aria-hidden="true">
+            <span>Package</span><span>What it powers</span><span>Monthly</span>
+          </div>
           <ul className="plans">
             {products.map((p) => (
               <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
@@ -79,7 +82,7 @@ export default function Home() {
                   <h3>{p.name}</h3>
                   <span>{[p.kva && `${p.kva} kVA inverter`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
                 </div>
-                <p className="plan-fit"><b>Powers:</b> {p.runs}</p>
+                <p className="plan-fit"><b className="plan-fit-label">Powers: </b>{p.runs}</p>
                 <p className="plan-price">
                   <strong>{naira(p.monthly)}<small>/month</small></strong>
                   <span>{p.months} months</span><span>{nairaShort(p.deposit)} deposit</span>

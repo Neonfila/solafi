@@ -288,6 +288,11 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 
 /* packages: a price list, not a row of cards */
 .plans { margin-top: 2.6rem; border-bottom: 1px solid var(--line-2); }
+/* desktop: column headings name the columns, so rows drop the "Powers:" label */
+.plans-head { display: grid; grid-template-columns: 15rem minmax(0, 1fr) auto; gap: 1rem 2.5rem; margin-top: 2.6rem; padding-bottom: 0.8rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.plans-head span:last-child { text-align: right; }
+.plans-head + .plans { margin-top: 0; }
+.plan-fit-label { display: none; }
 .plan { display: grid; grid-template-columns: 15rem minmax(0, 1fr) auto; gap: 1rem 2.5rem; align-items: baseline; padding: 1.8rem 0; border-top: 1px solid var(--line-2); }
 .plan-size h3 { white-space: nowrap; font-family: var(--display); font-weight: 700; font-size: 2.2rem; letter-spacing: -0.03em; line-height: 1; }
 .plan-size span { display: block; font-size: 0.92rem; font-weight: 500; color: var(--muted); margin-top: 0.5rem; }
@@ -349,6 +354,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 /* the NeonFila mark at text size: the tube keeps its orange, the dot follows the text colour */
 .neon-mark { display: block; overflow: visible; flex: none; }
 .footer-credit .nm-spark { fill: var(--cream); }
+.footer-legal { flex-basis: 100%; }
 .footer-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--muted); }
 
 
@@ -368,6 +374,9 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .hero-head, .faq-grid, .waitlist-grid, .about-split { grid-template-columns: 1fr; gap: 2rem; }
   .plan { grid-template-columns: 1fr auto; gap: 0.8rem 1.5rem; }
   .plan-fit { grid-column: 1 / -1; grid-row: 2; }
+  .plans-head { display: none; }
+  .plans-head + .plans { margin-top: 2.6rem; }
+  .plan-fit-label { display: inline; }
   .track { grid-template-columns: 1fr; margin-top: 2rem; }
   .track li { display: grid; grid-template-columns: 22px 1fr; column-gap: 1rem; align-content: start; padding-bottom: 1.8rem; }
   .track li::before { content: ''; position: absolute; left: 10px; top: 6px; bottom: -6px; width: 2px; background: var(--line-2); }
