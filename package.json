@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build && cp dist/index.html dist/404.html && node tools/build-sign-page.mjs",
     "preview": "vite preview",
-    "test": "node --test src/lib/calc.test.js src/lib/agreement.test.js src/lib/products.test.js"
+    "test": "node --test src/lib/calc.test.js src/lib/agreement.test.js src/lib/products.test.js src/lib/finder.test.js"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

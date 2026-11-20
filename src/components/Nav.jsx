@@ -8,6 +8,7 @@ const links = [
   { to: '/#how', label: 'How it works' },
   { to: '/#calculator', label: 'Calculator' },
   { to: '/#packages', label: 'Packages' },
+  { to: '/build', label: 'Find my package' },
   { to: '/#faq', label: 'FAQ' },
   { to: '/about', label: 'About' },
 ]

@@ -14,6 +14,7 @@ export default function Footer() {
           <Link to="/#how">How it works</Link>
           <Link to="/#calculator">Savings calculator</Link>
           <Link to="/#packages">Packages</Link>
+          <Link to="/build">Find my package</Link>
           <Link to="/#faq">FAQ</Link>
           <Link to="/about">About</Link>
           <Link to="/#waitlist">Join the waitlist</Link>
