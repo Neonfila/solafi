@@ -14,7 +14,7 @@ export const FALLBACK = [
 ]
 
 // The plan the "how it works" timeline uses, and the calculator starts on.
-export const FEATURED = 'GridMax'
+export const FEATURED = 'PocketGrid'
 
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '')
 const figure = (text, re) => {

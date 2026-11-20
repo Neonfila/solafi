@@ -16,7 +16,7 @@ test('months come from the plan total: deposit + 12 payments', () => {
 test('product names in the runs text match the real names', () => {
   const list = prepareProducts(FALLBACK)
   assert.match(list[3].runs, /^Everything in GridMax \(1hp or 1.5hp AC\)/)
-  assert.equal(list.find((p) => p.featured).name, 'GridMax')
+  assert.equal(list.find((p) => p.featured).name, 'PocketGrid')
 })
 
 test('nothing private is in the built-in copy', () => {
