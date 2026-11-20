@@ -577,13 +577,13 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
    a window lights when its room gets something, panels go on the roof as the
    package grows, the price glides and a dot slides along the package scale. */
 .find {
-  --sc-sky: #0A1611; --sc-win: #E9C46A; --sc-win-off: #0B1813; --sc-roof: #214636; --sc-house: #1A3A2C;
+  --sc-sky: #16372B; --sc-night: #040A07; --sc-win: #E9C46A; --sc-win-off: #0B1813; --sc-roof: #214636; --sc-house: #1A3A2C;
   --sc-door: #0E1D17; --sc-ground: #06100C; --sc-box: #22392F; --sc-panel: #24448A; --sc-cell: #7CF29A;
   --sc-slot: rgba(244, 241, 232, 0.07);
   padding: clamp(2rem, 5vw, 4rem) 0 5rem;
 }
 :root[data-theme='light'] .find {
-  --sc-sky: #E7DFCC; --sc-win: #F4C24F; --sc-win-off: #8E8570; --sc-roof: #3C705A; --sc-house: #2E5C49;
+  --sc-sky: #E7DFCC; --sc-night: #27363F; --sc-win: #F4C24F; --sc-win-off: #8E8570; --sc-roof: #3C705A; --sc-house: #2E5C49;
   --sc-door: #1F3F33; --sc-ground: #6E6654; --sc-box: #6B634F; --sc-panel: #1F3B78; --sc-cell: #2BB673;
   --sc-slot: rgba(255, 255, 255, 0.16);
 }
@@ -593,7 +593,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 
 .fl-room { margin-top: 2.6rem; }
 .fl-room h3 { font-size: 1.15rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line-2); }
-.fl-room li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1.2rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); }
+.fl-room li { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1.2rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); }
 .fl-name { font-size: 1.02rem; transition: color 200ms; }
 .fl-room li.on .fl-name { color: var(--sun); font-weight: 700; }
 .fl-w { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -606,26 +606,51 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .fl-room li.on output { color: var(--cream); animation: tick 260ms var(--ease); }
 @keyframes tick { from { transform: translateY(-5px); opacity: 0.3; } }
 .fl-clear { margin-top: 1.4rem; }
+.fl-flash { position: absolute; inset: 1px -0.8rem; z-index: -1; border-radius: 10px; background: var(--sun); pointer-events: none; animation: flash 900ms ease-out forwards; }
+@keyframes flash { from { opacity: 0.16; } to { opacity: 0; } }
 
 /* the answer */
 .find-answer { position: sticky; top: 92px; }
-.fh { display: block; width: 100%; height: auto; border-radius: var(--r); background: var(--sc-sky); }
+.find-answer .fa-body { padding-top: 0.6rem; }
+.fh { --night: 0; --sunk: 0; --lvl: 0; display: block; width: 100%; height: auto; border-radius: var(--r); background: var(--sc-sky); }
+.fh-night { fill: var(--sc-night); opacity: var(--night); }
+.fh-sunwrap { opacity: calc(1 - var(--night)); }
 .fh-sun { fill: var(--sc-win); }
+.fh-glow { fill: var(--sc-win); opacity: 0.16; }
+.fh-star { fill: #F4F1E8; opacity: calc(var(--night) * 0.85); animation: twinkle 3s ease-in-out infinite; animation-delay: calc(var(--i) * -0.7s); }
+@keyframes twinkle { 50% { opacity: calc(var(--night) * 0.3); } }
+.fh-moon { fill: #F4F1E8; opacity: var(--night); }
 .fh-roof { fill: var(--sc-roof); }
 .fh-wall { fill: var(--sc-house); }
 .fh-door { fill: var(--sc-door); }
 .fh-ground { fill: var(--sc-ground); }
+.fh-shade { fill: #000; opacity: calc(var(--night) * 0.3); pointer-events: none; }
 .fh-win { fill: var(--sc-win-off); transition: fill 400ms ease-out; }
 .fh-win.on { fill: var(--sc-win); animation: lamp 520ms linear; }
 @keyframes lamp { 0% { fill: var(--sc-win-off); } 18% { fill: var(--sc-win); } 30% { fill: var(--sc-win-off); } 45%, 100% { fill: var(--sc-win); } }
-.fh-pv { fill: var(--sc-slot); transition: fill 300ms ease-out; transition-delay: calc(var(--i) * 35ms); }
-.fh-pv.on { fill: var(--sc-panel); }
+.fh-halo { fill: var(--sc-win); opacity: calc(var(--night) * 0.22); }
+/* panels: new ones drop onto the roof one after another */
+.fh-pv { fill: var(--sc-slot); transition: fill 300ms ease-out; transform-box: fill-box; transform-origin: 50% 100%; }
+.fh-pv.on { fill: var(--sc-panel); animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
+@keyframes drop { from { transform: translateY(-16px) scaleY(0.6); opacity: 0; } 70% { transform: translateY(1px); opacity: 1; } }
+/* the battery, and power moving: roof to battery by day, battery to house by night */
 .fh-batt { fill: var(--sc-box); }
-.fh-cell { fill: var(--sc-slot); transition: fill 400ms ease-out; }
-.fh-cell.on { fill: var(--sc-cell); }
+.fh-slot { fill: var(--sc-slot); }
+.fh-lvl { fill: var(--sc-cell); transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--lvl)); transition: fill 300ms; }
+.fh[data-low] .fh-lvl { fill: #E76F51; }
+.fh-cable { fill: none; stroke: var(--sc-box); stroke-width: 2; }
+.fh-flow { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1.5 6; animation: flow 700ms linear infinite; }
+.fh-flow--sun { stroke: var(--sc-win); opacity: calc(var(--sunk) * var(--has)); }
+.fh-flow--night { stroke: var(--sc-cell); opacity: calc(var(--night) * var(--has)); }
+@keyframes flow { to { stroke-dashoffset: -7.5; } }
+.fh-cap { display: flex; gap: 0.6rem; align-items: baseline; min-height: 2.6em; margin-top: 0.7rem; font-size: 0.88rem; color: var(--muted); line-height: 1.35; }
+.fh-cap b { flex: none; min-width: 3.3em; color: var(--cream); font-variant-numeric: tabular-nums; }
+.fh-cap b:empty { display: none; }
 
 .fa-body { padding-top: 1.4rem; }
 .fa-label { font-size: 0.9rem; color: var(--muted); }
+.fa-move { display: inline-flex; align-items: center; gap: 0.2rem; margin-left: 0.6rem; padding: 0.05rem 0.5rem 0.05rem 0.35rem; border-radius: 99px; font-size: 0.78rem; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 13%, transparent); animation: moved 3s var(--ease) forwards; }
+@keyframes moved { 0% { opacity: 0; transform: translateX(-6px); } 10%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 .fa-name { font-size: clamp(2.2rem, 4vw, 3rem); color: var(--sun); margin-top: 0.15rem; animation: rise 380ms var(--ease); }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 .fa-spec { color: var(--muted); font-size: 0.95rem; margin-top: 0.4rem; }
