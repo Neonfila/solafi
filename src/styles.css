@@ -292,7 +292,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .plans-head { display: grid; grid-template-columns: 15rem minmax(0, 1fr) auto; gap: 1rem 2.5rem; margin-top: 2.6rem; padding-bottom: 0.8rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .plans-head span:last-child { text-align: right; }
 .plans-head + .plans { margin-top: 0; }
-.plan-fit-label { display: none; }
+.plan-size .plan-spec-short, .plan-terms, .plan-more { display: none; }
 .plan { display: grid; grid-template-columns: 15rem minmax(0, 1fr) auto; gap: 1rem 2.5rem; align-items: baseline; padding: 1.8rem 0; border-top: 1px solid var(--line-2); }
 .plan-size h3 { white-space: nowrap; font-family: var(--display); font-weight: 700; font-size: 2.2rem; letter-spacing: -0.03em; line-height: 1; }
 .plan-size span { display: block; font-size: 0.92rem; font-weight: 500; color: var(--muted); margin-top: 0.5rem; }
@@ -376,7 +376,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .plan-fit { grid-column: 1 / -1; grid-row: 2; }
   .plans-head { display: none; }
   .plans-head + .plans { margin-top: 2.6rem; }
-  .plan-fit-label { display: inline; }
+  .plan-fit::before { content: 'Powers: '; color: var(--cream); font-weight: 500; }
   .track { grid-template-columns: 1fr; margin-top: 2rem; }
   .track li { display: grid; grid-template-columns: 22px 1fr; column-gap: 1rem; align-content: start; padding-bottom: 1.8rem; }
   .track li::before { content: ''; position: absolute; left: 10px; top: 6px; bottom: -6px; width: 2px; background: var(--line-2); }
@@ -541,7 +541,31 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 
 /* installed systems photo strip */
 .installs { --edge: max(20px, calc((100% - 1180px) / 2)); display: flex; gap: 0.9rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 1.6rem var(--edge) 0.8rem; scroll-padding-inline: var(--edge); scrollbar-width: thin; }
-.installs a { flex: 0 0 auto; scroll-snap-align: start; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); background: var(--ink-3); }
+.installs a { position: relative; flex: 0 0 auto; scroll-snap-align: start; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); background: var(--ink-3); }
 .installs img { display: block; height: clamp(15rem, 42vw, 22rem); width: auto; transition: transform 300ms var(--ease); }
 .installs a:hover img { transform: scale(1.03); }
+.install-tag { position: absolute; top: 0.7rem; left: 0.7rem; display: grid; padding: 0.4rem 0.7rem; border-radius: 10px; background: rgba(12, 20, 16, 0.82); color: #f5f1e8; font-size: 0.78rem; line-height: 1.25; white-space: nowrap; backdrop-filter: blur(4px); }
+.install-tag b { font-weight: 700; }
+.install-tag span { opacity: 0.8; }
 @media (max-width: 560px) { .installs { --edge: 16px; } }
+
+/* packages on a phone: one card each, only what you need to choose.
+   Two type sizes inside a card; more space between cards than inside. */
+@media (max-width: 640px) {
+  .plans, .plans-head + .plans { display: grid; gap: 1.1rem; border: 0; margin-top: 2rem; }
+  .plan { display: block; padding: 1.3rem 1.25rem 1.1rem; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink-2); }
+  .plan--featured { border-color: var(--sun); }
+  .plan-size .plan-spec-long, .plan-fit, .plan-price span, .plan-price em { display: none; }
+  .plan-size h3, .plan-price strong { font-size: 1.7rem; }
+  .plan-size .plan-spec-short, .plan-terms { display: block; font-size: 0.92rem; color: var(--muted); }
+  .plan-size .plan-spec-short { margin-top: 0.35rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .plan-price { text-align: left; margin-top: 0.9rem; font-size: 0.92rem; }
+  .plan-price small { font-size: 0.92rem; }
+  .plan-terms { margin-top: 0.2rem; }
+  .plan-more { display: block; margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--line); font-size: 0.92rem; color: var(--muted); }
+  .plan-more summary { display: flex; align-items: center; gap: 0.4rem; min-height: 32px; cursor: pointer; font-weight: 700; color: var(--cream); list-style: none; }
+  .plan-more summary::-webkit-details-marker { display: none; }
+  .plan-more summary::after { content: '▾'; transition: transform 160ms; }
+  .plan-more[open] summary::after { transform: rotate(180deg); }
+  .plan-more p { margin-top: 0.5rem; }
+}

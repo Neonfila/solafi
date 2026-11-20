@@ -10,18 +10,24 @@ import { featuredOf, useProducts } from '../lib/products.js'
 
 
 // Photos of systems the team has installed, logo added (public/installs).
+// Order: one indoor photo per package (labelled, in package order), then the
+// other indoor photos, then roofs and panels. A package with no photo the team
+// has tagged is skipped rather than guessed (GridMax, as of Nov 2026).
 const installs = [
-  ['install-01', 'Solar panels on a dark tiled roof'],
+  ['install-11', 'Inverter above a lithium battery', 'PocketGrid'],
+  ['install-06', 'Lithium battery and inverter on a tiled wall', 'Prime'],
+  ['install-07', 'Inverter above a lithium battery', 'SuperNova'],
+  ['install-08', 'Inverter with two batteries under the stairs', 'Independence'],
+  ['install-05', 'Inverter and battery on a wall'],
+  ['install-09', 'Inverter and wall battery in a side passage'],
   ['install-02', 'Four inverters and batteries in a stairwell'],
+  ['install-01', 'Solar panels on a dark tiled roof'],
   ['install-03', 'Solar panels on a metal roof'],
   ['install-04', 'Installers fitting panels on a roof'],
-  ['install-05', 'Inverter and battery on a wall'],
-  ['install-06', 'Lithium battery and inverter on a tiled wall'],
-  ['install-07', 'Inverter above a lithium battery'],
-  ['install-08', 'Inverter with two batteries under the stairs'],
-  ['install-09', 'Inverter and wall battery in a side passage'],
   ['install-10', 'Rows of panels on a roof'],
 ]
+
+const specOf = (p) => [p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh`].filter(Boolean).join(' · ')
 
 const faqs = [
   { q: 'Is the calculator a quote?', a: 'No, an estimate from your numbers. Your quote comes after we see what you need to power.' },
@@ -80,14 +86,22 @@ export default function Home() {
               <li key={p.id} className={`plan${p.featured ? ' plan--featured' : ''}`}>
                 <div className="plan-size">
                   <h3>{p.name}</h3>
-                  <span>{[p.kva && `${p.kva} kVA inverter`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
+                  <span className="plan-spec-long">{[p.kva && `${p.kva} kVA inverter`, p.batteryKwh && `${p.batteryKwh} kWh battery`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
+                  <span className="plan-spec-short">{[p.kva && `${p.kva} kVA`, p.batteryKwh && `${p.batteryKwh} kWh`, p.panels && `${p.panels} panels`].filter(Boolean).join(' · ')}</span>
                 </div>
-                <p className="plan-fit"><b className="plan-fit-label">Powers: </b>{p.runs}</p>
+                <p className="plan-fit">{p.runs}</p>
                 <p className="plan-price">
                   <strong>{naira(p.monthly)}<small>/month</small></strong>
                   <span>{p.months} months</span><span>{nairaShort(p.deposit)} deposit</span>
                   <em>or {nairaShort(p.cashPrice)} outright</em>
                 </p>
+                {/* phone only: one short terms line, the rest behind a tap */}
+                <p className="plan-terms">{nairaShort(p.deposit)} deposit · {p.months} months</p>
+                <details className="plan-more">
+                  <summary>What it runs</summary>
+                  <p>{p.runs}</p>
+                  <p>or {nairaShort(p.cashPrice)} outright</p>
+                </details>
               </li>
             ))}
           </ul>
@@ -100,11 +114,21 @@ export default function Home() {
           <p className="section-lede">Panels, inverters and batteries our team has put in homes and shops.</p>
         </div>
         <div className="installs" tabIndex={0} aria-label="Photos of installed systems">
-          {installs.map(([file, alt]) => (
-            <a key={file} href={`/installs/${file}.jpg`} target="_blank" rel="noreferrer">
-              <img src={`/installs/${file}.jpg`} alt={alt} loading="lazy" decoding="async" />
-            </a>
-          ))}
+          {installs.map(([file, alt, pkgName]) => {
+            const pkg = pkgName && products.find((p) => p.name.toLowerCase() === pkgName.toLowerCase())
+            const label = pkg ? [pkg.name, specOf(pkg)].filter(Boolean).join(' · ') : pkgName
+            return (
+              <a key={file} href={`/installs/${file}.jpg`} target="_blank" rel="noreferrer" className="install">
+                <img src={`/installs/${file}.jpg`} alt={label ? `${label}: ${alt}` : alt} loading="lazy" decoding="async" />
+                {label && (
+                  <span className="install-tag" aria-hidden="true">
+                    <b>{pkg ? pkg.name : pkgName}</b>
+                    {pkg && specOf(pkg) && <span>{specOf(pkg)}</span>}
+                  </span>
+                )}
+              </a>
+            )
+          })}
         </div>
       </section>
 
