@@ -1,16 +1,19 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowRight, ArrowUp, ChevronUp, Minus, Plus } from 'lucide-react'
 import { naira, nairaShort } from '../lib/calc.js'
 import { useProducts } from '../lib/products.js'
 import { APPLIANCES, ROOMS, describe, limitsOf, recommend } from '../lib/finder.js'
+import FindHouse, { slotKey } from '../components/FindHouse.jsx'
+import ApplianceIcon from '../components/ApplianceIcon.jsx'
 
 // Find my package: a list of what you might want to power, and the smallest
-// Solafi package that runs it. The house is the one from the homepage street:
-// each window is a room and lights up when you add something from it, panels
-// go on the roof as the package grows, and the battery shows what your nights use.
+// Solafi package that runs it. The house beside it has its front wall off:
+// what you add flies into its room and runs there, panels go on the roof as the
+// package grows, and a day and a night show what the battery carries.
 
 export const BUILD_KEY = 'solafi.build'
+const watts = (w) => (w >= 1000 ? `${+(w / 1000).toFixed(2)} kW` : `${w} W`)
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // A number that glides to its new value instead of jumping.
@@ -38,143 +41,39 @@ function useGlide(value, ms = 600) {
   return shown
 }
 
-// Panel spots on the roof, lowest row first, from the middle out (16 = Independence).
-const ROWS = [{ y: 118, n: 6 }, { y: 101, n: 5 }, { y: 84, n: 3 }, { y: 67, n: 2 }]
-const SPOTS = ROWS.flatMap((row, r) =>
-  Array.from({ length: row.n }, (_, i) => ({ x: 150 - (row.n * 22) / 2 + i * 22 + 1, y: row.y, r, d: Math.abs(i - (row.n - 1) / 2) }))
-).sort((a, b) => a.r - b.r || a.d - b.d)
-
-// one window per room, in the order of ROOMS
-const WINDOWS = [[92, 150], [140, 150], [188, 150], [92, 196], [188, 196]]
-const STARS = [[24, 20], [52, 52], [94, 26], [120, 12], [178, 14], [206, 40], [270, 18], [286, 62], [16, 92], [262, 96]]
-
-// A day and a night in about 16 seconds. Sunrise is t = 0, sunset t = DUSK.
-const LOOP = 16000
-const DUSK = 0.55
-const clamp01 = (x) => Math.min(1, Math.max(0, x))
-const ease = (a, b, x) => { const u = clamp01((x - a) / (b - a)); return u * u * (3 - 2 * u) }
-
-function hourAt(t) {
-  return Math.floor(t < DUSK ? 6 + (13 * t) / DUSK : 19 + (11 * (t - DUSK)) / (1 - DUSK)) % 24
-}
-function clockOf(h) {
-  return `${h % 12 || 12} ${h < 12 ? 'am' : 'pm'}`
-}
-// what the house is doing at that hour, in words
-function lineAt(h, drain) {
-  if (h >= 6 && h < 10) return 'The sun is up. The panels start filling the battery.'
-  if (h >= 10 && h < 17) return 'The sun runs your home and fills the battery.'
-  if (h >= 17 && h < 19) return 'The battery is full for the night.'
-  if (h >= 19 || h < 3) return 'The sun is down. The battery runs your home.'
-  return drain >= 1 ? 'The battery runs out before sunrise.' : `By sunrise, about ${Math.round((1 - drain) * 100)}% is still in the battery.`
-}
-
-function House({ lit, panels, drain, active, mini = false }) {
-  const svg = useRef(null)
-  const sun = useRef(null)
-  const clock = useRef(null)
-  const line = useRef(null)
-  const time = useRef(0.12) // start mid-morning
-  const mask = 'moon' + useId().replace(/[^\w-]/g, '')
-
-  // new panels drop in one after another, starting from the ones already there
-  const last = useRef(panels)
-  const from = useRef(0)
-  if (last.current !== panels) {
-    from.current = Math.min(last.current, panels)
-    last.current = panels
-  }
-
-  useEffect(() => {
-    const el = svg.current
-    const low = clamp01(1 - drain)
-    let said = ''
-    const paint = (t) => {
-      const night = ease(0.48, 0.6, t) * (1 - ease(0.92, 1, t))
-      const d = clamp01(t / DUSK)
-      const level = t < DUSK ? low + (1 - low) * ease(0.04, 0.42, t) : clamp01(1 - drain * ((t - DUSK) / (1 - DUSK)))
-      el.style.setProperty('--night', night.toFixed(3))
-      el.style.setProperty('--sunk', (t < DUSK ? Math.sin(Math.PI * d) : 0).toFixed(3))
-      el.style.setProperty('--lvl', level.toFixed(3))
-      el.toggleAttribute('data-low', active && level < 0.15)
-      sun.current.setAttribute('transform', `translate(${(22 + 256 * d).toFixed(1)} ${(118 - 92 * Math.sin(Math.PI * d)).toFixed(1)})`)
-      if (!line.current) return // the small house has no caption
-      const h = hourAt(t)
-      clock.current.textContent = active ? clockOf(h) : ''
-      const words = active ? lineAt(h, drain) : 'Add something to see a day with your package.'
-      if (words !== said) {
-        line.current.textContent = words
-        if (said && !reducedMotion()) line.current.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'ease-out' })
-        said = words
-      }
-    }
-    if (reducedMotion()) {
-      // no loop: an afternoon, and the night told in words
-      paint(0.3)
-      if (!line.current) return
-      line.current.textContent = active ? `${lineAt(12, drain)} ${lineAt(4, drain)}` : line.current.textContent
-      clock.current.textContent = ''
-      return
-    }
-    let raf = 0
-    let prev = 0
-    const frame = (now) => {
-      time.current = (time.current + (now - prev) / LOOP) % 1
-      prev = now
-      paint(time.current)
-      raf = requestAnimationFrame(frame)
-    }
-    const play = () => { if (!raf) { prev = performance.now(); raf = requestAnimationFrame(frame) } }
-    const pause = () => { cancelAnimationFrame(raf); raf = 0 }
-    paint(time.current)
-    // only plays while it can be seen
-    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? play() : pause()))
-    io.observe(el)
-    return () => { io.disconnect(); pause() }
-  }, [drain, active])
-
-  return (
-    <div className={mini ? 'fh-scene fh-scene--mini' : 'fh-scene'}>
-      <svg ref={svg} viewBox="0 0 300 260" className="fh" style={{ '--has': active ? 1 : 0, '--from': from.current }} {...(mini ? { 'aria-hidden': true } : { role: 'img', 'aria-label': `A house with ${panels} solar panels on the roof, through a day and a night.` })}>
-        <defs>
-          <mask id={mask}>
-            <circle cx="62" cy="40" r="10" fill="#fff" />
-            <circle cx="67" cy="36" r="9" fill="#000" />
-          </mask>
-        </defs>
-        <rect width="300" height="260" className="fh-night" />
-        <g ref={sun} className="fh-sunwrap">
-          <circle r="20" className="fh-glow" />
-          <circle r="12" className="fh-sun" />
-        </g>
-        {STARS.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i % 3 ? 1 : 1.5} className="fh-star" style={{ '--i': i }} />)}
-        <circle cx="62" cy="40" r="10" mask={`url(#${mask})`} className="fh-moon" />
-        <path d="M58 128 L150 52 L242 128 Z" className="fh-roof" />
-        {SPOTS.map((p, i) => (
-          <rect key={i} x={p.x} y={p.y} width="20" height="13" rx="1.5" className={`fh-pv${i < panels ? ' on' : ''}`} style={{ '--i': i }} />
-        ))}
-        <rect x="72" y="128" width="156" height="112" className="fh-wall" />
-        <rect x="138" y="196" width="24" height="44" rx="2" className="fh-door" />
-        <path d="M236 124 L249 131 V194" className="fh-cable" />
-        <path d="M240 216 H224" className="fh-cable" />
-        <rect x="240" y="196" width="18" height="38" rx="3.5" className="fh-batt" />
-        <rect x="245" y="193" width="8" height="4" rx="1" className="fh-batt" />
-        <rect y="240" width="300" height="20" className="fh-ground" />
-        <rect width="300" height="260" className="fh-shade" />
-        {WINDOWS.map(([x, y], i) => (
-          <g key={i}>
-            {lit[i] && <rect x={x - 5} y={y - 5} width="30" height="34" rx="6" className="fh-halo" />}
-            <rect x={x} y={y} width="20" height="24" rx="2" className={`fh-win${lit[i] ? ' on' : ''}`} />
-          </g>
-        ))}
-        <rect x="243.5" y="199.5" width="11" height="31" rx="1.5" className="fh-slot" />
-        <rect x="243.5" y="199.5" width="11" height="31" rx="1.5" className="fh-lvl" />
-        <path d="M236 124 L249 131 V194" className="fh-flow fh-flow--sun" />
-        <path d="M240 216 H224" className="fh-flow fh-flow--night" />
-      </svg>
-      {!mini && <p className="fh-cap" aria-hidden="true"><b ref={clock} /><span ref={line} /></p>}
-    </div>
-  )
+// When + is pressed, the appliance's icon flies from its row into its room in
+// whichever house is on screen, and lands as the drawing there appears.
+const FLY_MS = 620
+function flyIn(from, slot) {
+  if (reducedMotion() || !from) return
+  const houses = [...document.querySelectorAll('.find .fx')].filter((h) => {
+    const r = h.getBoundingClientRect()
+    return r.width > 0 && r.bottom > 0 && r.top < innerHeight
+  })
+  const house = houses.sort((p, q) => q.getBoundingClientRect().width - p.getBoundingClientRect().width)[0]
+  const to = house?.querySelector(`[data-slot="${slot}"]`)
+  if (!to) return
+  const a = from.getBoundingClientRect()
+  const b = to.getBoundingClientRect()
+  const dx = b.left + b.width / 2 - (a.left + a.width / 2)
+  const dy = b.top + b.height / 2 - (a.top + a.height / 2)
+  const small = Math.max(0.35, Math.min(1, Math.max(b.width, b.height) / a.width))
+  // outer moves across, inner rises and falls: together they make an arc
+  const outer = document.createElement('div')
+  const inner = from.cloneNode(true)
+  outer.className = 'fl-flyer'
+  Object.assign(outer.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px`, height: `${a.height}px` })
+  inner.classList.add('fl-flyer-icon')
+  outer.appendChild(inner)
+  document.body.appendChild(outer)
+  const lift = -Math.min(90, 30 + Math.abs(dx) * 0.15)
+  outer.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${dx}px)` }], { duration: FLY_MS, easing: 'cubic-bezier(0.45, 0, 0.1, 1)' })
+  inner.animate([
+    { transform: 'translateY(0) scale(1)' },
+    { transform: `translateY(${lift}px) scale(1.1)`, offset: 0.35, easing: 'cubic-bezier(0.3, 0, 0.6, 1)' },
+    { transform: `translateY(${dy}px) scale(${small})` },
+  ], { duration: FLY_MS, easing: 'cubic-bezier(0.2, 0.6, 0.4, 1)' })
+  outer.animate([{ opacity: 1 }, { opacity: 1, offset: 0.82 }, { opacity: 0 }], { duration: FLY_MS }).finished.then(() => outer.remove(), () => outer.remove())
 }
 
 export default function Build() {
@@ -219,6 +118,16 @@ export default function Build() {
     return next
   })
 
+  const add = (id, n, button) => {
+    if (n >= 99) return
+    set(id, n + 1)
+    setBump({ id, k: Date.now() })
+    const icon = button.closest('li')?.querySelector('.fl-icon')
+    const key = slotKey(id, { ...sel, [id]: n + 1 })
+    // wait for the new drawing to be in the house before aiming at it
+    requestAnimationFrame(() => requestAnimationFrame(() => flyIn(icon, key)))
+  }
+
   const goSavings = () => navigate(`/?pkg=${pkg.id}#calculator`)
   const goWaitlist = () => {
     try {
@@ -227,7 +136,6 @@ export default function Build() {
     navigate(`/?pkg=${pkg.id}#waitlist`)
   }
 
-  const lit = ROOMS.map((r) => APPLIANCES.some((a) => a.room === r.id && sel[a.id] > 0))
   const panels = empty ? 0 : pkg.panels || 0
   const drain = empty ? 0 : t.nightKwh / (lim.batteryKwh || 1) // share of the battery one night uses
   const moved = move && (
@@ -271,7 +179,7 @@ export default function Build() {
           <p className="find-lede">Add what you use at home or in your shop. We show the smallest package that runs it.</p>
           {/* phone: the house sits here, at the top of the list */}
           <div className="find-top">
-            <House lit={lit} panels={panels} drain={drain} active={!empty} />
+            <FindHouse sel={sel} panels={panels} drain={drain} />
           </div>
 
           {ROOMS.map((room) => (
@@ -283,12 +191,16 @@ export default function Build() {
                   return (
                     <li key={a.id} className={n ? 'on' : ''}>
                       {bump?.id === a.id && <span className="fl-flash" key={bump.k} aria-hidden="true" />}
-                      <span className="fl-name">{a.name}</span>
-                      <span className="fl-w">{a.watts >= 1000 ? `${a.watts / 1000} kW` : `${a.watts} W`}</span>
+                      <span className="fl-icon"><ApplianceIcon id={a.id} /></span>
+                      <span className="fl-name">
+                        {a.name}
+                        {n > 1 && <small className="fl-times" key={n}>{n} × {watts(a.watts)} = {watts(a.watts * n)}</small>}
+                      </span>
+                      <span className="fl-w">{watts(a.watts)}</span>
                       <span className="fl-step">
                         <button type="button" aria-label={`One less ${a.name}`} disabled={!n} onClick={() => set(a.id, n - 1)}><Minus size={16} /></button>
                         <output aria-label={`${a.name}: ${n}`} key={n}>{n}</output>
-                        <button type="button" aria-label={`Add a ${a.name}`} onClick={() => { set(a.id, n + 1); setBump({ id: a.id, k: Date.now() }) }}><Plus size={16} /></button>
+                        <button type="button" aria-label={`Add a ${a.name}`} onClick={(e) => add(a.id, n, e.currentTarget)}><Plus size={16} /></button>
                       </span>
                     </li>
                   )
@@ -300,7 +212,7 @@ export default function Build() {
         </div>
 
         <aside className="find-answer">
-          <House lit={lit} panels={panels} drain={drain} active={!empty} />
+          <FindHouse sel={sel} panels={panels} drain={drain} />
           <div className="fa-body">{answer}</div>
         </aside>
       </div>
@@ -308,14 +220,14 @@ export default function Build() {
       {/* phone: the answer stays at the bottom of the screen */}
       <div className={`find-dock${open ? ' open' : ''}`}>
         <button type="button" className="find-dock-bar" aria-expanded={open} onClick={() => setOpen(!open)}>
-          <House lit={lit} panels={panels} drain={drain} active={!empty} mini />
+          <FindHouse sel={sel} panels={panels} drain={drain} mini />
           <span className="find-dock-name"><small>{moved || (empty ? 'Our smallest package' : 'Your package')}</small><b key={pkg.id}>{pkg.name}</b></span>
           <span className="find-dock-price">{nairaShort(Math.round(monthly))}<small>/mo</small></span>
           <ChevronUp size={20} className="find-dock-chev" />
         </button>
         <div className="find-dock-sheet">
           <div>
-            <House lit={lit} panels={panels} drain={drain} active={!empty} />
+            <FindHouse sel={sel} panels={panels} drain={drain} />
             <div className="fa-body">{answer}</div>
           </div>
         </div>
