@@ -8,16 +8,37 @@ import { waitlistEndpoint } from '../lib/config.js'
 // runs in preview mode and sends nothing.
 const ENDPOINT = import.meta.env.VITE_WAITLIST_ENDPOINT || waitlistEndpoint
 
+// What someone built on /build ("Join the waitlist" there), kept for this visit.
+const BUILD_KEY = 'solafi.build'
+function readBuild() {
+  try {
+    const b = JSON.parse(sessionStorage.getItem(BUILD_KEY) || 'null')
+    return b?.system ? b : null
+  } catch {
+    return null
+  }
+}
+
 export default function Waitlist({ estimate }) {
   const [state, setState] = useState('idle') // idle | sending | done | preview | error
   const [kind, setKind] = useState('Home')
+  const [build, setBuild] = useState(readBuild)
+  const forgetBuild = () => {
+    try { sessionStorage.removeItem(BUILD_KEY) } catch {}
+  }
 
   async function submit(e) {
     e.preventDefault()
     const data = Object.fromEntries(new FormData(e.currentTarget))
     data.kind = kind
     if (estimate) Object.assign(data, estimate)
+    if (build) {
+      // the sheet has no Appliances column yet, so the list rides in System too
+      data.system = `${build.system} (Find my package: ${build.appliances || 'nothing added'})`
+      data.appliances = build.appliances
+    }
     if (!ENDPOINT) {
+      forgetBuild()
       setState('preview')
       return
     }
@@ -30,7 +51,9 @@ export default function Waitlist({ estimate }) {
         body: JSON.stringify(data),
       })
       const out = await res.json().catch(() => null)
-      setState(res.ok && out?.ok ? 'done' : 'error')
+      const ok = res.ok && out?.ok
+      if (ok) forgetBuild()
+      setState(ok ? 'done' : 'error')
     } catch {
       setState('error')
     }
@@ -70,6 +93,12 @@ export default function Waitlist({ estimate }) {
         <span>City or area</span>
         <input name="city" required autoComplete="address-level2" />
       </label>
+      {build && (
+        <p className="estimate-chip">
+          Sends your list: {build.system}{build.appliances ? ` · ${build.appliances}` : ''}.{' '}
+          <button type="button" className="chip-undo" onClick={() => { forgetBuild(); setBuild(null) }}>Remove</button>
+        </p>
+      )}
       {estimate && (
         <p className="estimate-chip">
           Sends your estimate: {estimate.system}, {naira(estimate.solafiMonthly)}/month.

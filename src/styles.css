@@ -82,7 +82,8 @@ h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; line-height:
 .hero-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 2rem; }
 .hero h1 { font-size: clamp(2.6rem, 6.6vw, 5.6rem); letter-spacing: -0.035em; }
 .hero h1 .sun-text { white-space: nowrap; }
-.hero-go { margin-bottom: 0.6rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 0.6rem; }
+.faq-item p a { color: var(--sun); text-decoration: underline; text-underline-offset: 3px; }
 .hero-sub { margin-top: 1.2rem; max-width: 34em; font-size: 1.12rem; color: var(--muted); }
 .plan-fit b { color: var(--cream); font-weight: 500; }
 
@@ -390,7 +391,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 @media (max-width: 560px) {
   body { font-size: 16px; }
   .wrap { width: calc(100% - 32px); }
-  .hero-go { width: 100%; }
+  .hero-actions, .hero-actions .btn { width: 100%; }
   .calc-result { padding: 1.2rem; border-radius: 18px; }
   .section { padding-block: 3rem; }
   .field-row { gap: 0.7rem; }
@@ -569,3 +570,238 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .plan-more[open] summary::after { transform: rotate(180deg); }
   .plan-more p { margin-top: 0.5rem; }
 }
+
+/* ── Find my package (/build) ───────────────────────────────────────────────
+   A plain list on the left, like the packages price list, and the answer on
+   the right with the homepage house. Motion is small and means something:
+   a window lights when its room gets something, panels go on the roof as the
+   package grows, the price glides and a dot slides along the package scale. */
+.find {
+  --sc-sky: #16372B; --sc-night: #040A07; --sc-win: #E9C46A; --sc-ground: #06100C; --sc-panel: #24448A; --sc-cell: #7CF29A;
+  --sc-slot: rgba(244, 241, 232, 0.07); --sc-box: #22392F;
+  --sc-roof: #6A3427; --sc-rib: rgba(0, 0, 0, 0.22); --sc-fascia: #4A2219; --sc-wall: #0E1D17; --sc-plinth: #091410;
+  --sc-room0: #2A4337; --sc-room1: #263F3A; --sc-room2: #283B3C; --sc-floor: #3B3427;
+  --sc-furn: #6B5A40; --sc-top: #57492F; --sc-white: #D9DFDA; --sc-line: rgba(0, 0, 0, 0.25); --sc-dark: #1A2420;
+  --sc-screen: #0A1310; --sc-metal: #8C9592; --sc-tank: #050807; --sc-pump: #3A68A0; --sc-bulb: #FFE7A3; --sc-steam: rgba(255, 255, 255, 0.45);
+  --spring: cubic-bezier(0.25, 0.8, 0.25, 1.15);
+  --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%, 1.067, 1.099 24.3%, 1.108 26%, 1.104, 1.088 31.5%, 1.019 40.4%, 0.996 46.7%, 0.991 50.4%, 1 61.9%, 1.002 70.8%, 1);
+  padding: clamp(2rem, 5vw, 4rem) 0 5rem;
+}
+:root[data-theme='light'] .find {
+  --sc-sky: #E7DFCC; --sc-night: #27363F; --sc-win: #F4C24F; --sc-ground: #6E6654; --sc-panel: #1F3B78; --sc-cell: #2BB673;
+  --sc-slot: rgba(255, 255, 255, 0.18); --sc-box: #6B634F;
+  --sc-roof: #8A4130; --sc-rib: rgba(0, 0, 0, 0.13); --sc-fascia: #62291D; --sc-wall: #5E5747; --sc-plinth: #4B4538;
+  --sc-room0: #F2E6CC; --sc-room1: #E4EBDC; --sc-room2: #E2E6E6; --sc-floor: #B79F7A;
+  --sc-furn: #A98A63; --sc-top: #8C7152; --sc-white: #FBFAF6; --sc-line: rgba(0, 0, 0, 0.12); --sc-dark: #3D4643;
+  --sc-screen: #1D2A30; --sc-metal: #A9B0AD; --sc-tank: #22272A; --sc-pump: #3E6FA6; --sc-bulb: #FFE7A3; --sc-steam: rgba(90, 90, 90, 0.4);
+}
+.find-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 26rem); gap: clamp(2rem, 6vw, 5.5rem); align-items: start; }
+.find-list h1 { font-size: clamp(2.4rem, 5.5vw, 4.2rem); }
+.find-lede { margin-top: 1rem; color: var(--muted); font-size: 1.1rem; max-width: 30em; }
+
+.fl-room { margin-top: 2.6rem; }
+.fl-room h3 { font-size: 1.15rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line-2); }
+.fl-room li { position: relative; isolation: isolate; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 1.2rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); }
+.fl-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--muted); background: color-mix(in srgb, var(--cream) 6%, transparent); transition: color 200ms, background 200ms; }
+.fl-room li.on .fl-icon { color: var(--sun); background: color-mix(in srgb, var(--sun) 14%, transparent); }
+.fl-name { display: grid; font-size: 1.02rem; transition: color 200ms; }
+.fl-times { font-size: 0.78rem; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; animation: tick 260ms var(--ease); }
+.fl-flyer { position: fixed; z-index: 300; pointer-events: none; }
+.fl-flyer-icon { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 10px; color: #fff; background: var(--sun); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+.find { --land: 520ms; }
+.fl-room li.on .fl-name { color: var(--sun); font-weight: 700; }
+.fl-w { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fl-step { display: inline-flex; align-items: center; gap: 0.15rem; }
+.fl-step button { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--cream); transition: background 160ms, color 160ms, opacity 160ms; }
+.fl-step button:hover { background: color-mix(in srgb, var(--cream) 8%, transparent); }
+.fl-step button:last-child { color: var(--sun); }
+.fl-step button:disabled { opacity: 0.25; pointer-events: none; }
+.fl-step output { min-width: 1.6rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); }
+.fl-room li.on output { color: var(--cream); animation: tick 260ms var(--ease); }
+@keyframes tick { from { transform: translateY(-5px); opacity: 0.3; } }
+.fl-clear { margin-top: 1.4rem; }
+.fl-flash { position: absolute; inset: 1px -0.8rem; z-index: -1; border-radius: 10px; background: var(--sun); pointer-events: none; animation: flash 900ms ease-out forwards; }
+@keyframes flash { from { opacity: 0.16; } to { opacity: 0; } }
+
+/* the answer */
+.find-answer { position: sticky; top: 92px; }
+.find-answer .fa-body { padding-top: 0.6rem; }
+.fh { --night: 0; --sunk: 0; --lvl: 0; display: block; width: 100%; height: auto; border-radius: var(--r); background: var(--sc-sky); }
+.fh-night { fill: var(--sc-night); opacity: var(--night); }
+.fh-sun { fill: var(--sc-win); }
+.fh-glow { fill: var(--sc-win); opacity: 0.16; }
+.fh-star { fill: #F4F1E8; opacity: calc(var(--night) * 0.85); animation: twinkle 3s ease-in-out infinite; animation-delay: calc(var(--i) * -0.7s); }
+@keyframes twinkle { 50% { opacity: calc(var(--night) * 0.3); } }
+.fh-moon { fill: #F4F1E8; opacity: var(--night); }
+.fh-ground { fill: var(--sc-ground); }
+.fh-shade { fill: #000; opacity: calc(var(--night) * 0.32); pointer-events: none; }
+
+/* the house, front wall off */
+.fx-roof { fill: var(--sc-roof); }
+.fx-rib { stroke: var(--sc-rib); stroke-width: 0.9; }
+.fx-rib-hi { stroke: rgba(255, 255, 255, 0.07); stroke-width: 0.7; }
+.fx-hip-hi { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1.4; stroke-linecap: round; }
+.fx-hip-lo { stroke: rgba(0, 0, 0, 0.22); stroke-width: 1.4; stroke-linecap: round; }
+.fx-ridge { fill: var(--sc-fascia); }
+.fx-step { stroke: rgba(0, 0, 0, 0.26); stroke-width: 1.3; }
+.fx-step-hi { stroke: rgba(255, 255, 255, 0.1); stroke-width: 0.8; }
+.fx-ridge-hi { fill: rgba(255, 255, 255, 0.18); }
+.fx-soffit { fill: rgba(0, 0, 0, 0.35); }
+.fx-fascia-hi { fill: rgba(255, 255, 255, 0.16); }
+.fx-contact { fill: #000; opacity: 0.16; }
+.fx-pv-rail { fill: var(--sc-dark); opacity: 0.7; }
+.fx-pv-frame { fill: none; stroke: rgba(225, 232, 240, 0.55); stroke-width: 0.8; }
+.fx-pv-glare { fill: #fff; opacity: 0.1; }
+.fx-pv-face, .fx-pv-rail { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
+.fx-fascia { fill: var(--sc-fascia); }
+.fx-pv { fill: var(--sc-slot); transition: fill 300ms ease-out; }
+.fx-pv.on { fill: var(--sc-panel); }
+.fx-pv-grid { fill: none; stroke: rgba(255, 255, 255, 0.2); stroke-width: 0.5; }
+.fx-pv.on { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
+@keyframes drop { from { transform: translateY(-16px) scaleY(0.6); opacity: 0; } 70% { transform: translateY(1px); opacity: 1; } }
+.fx-room--0 { fill: var(--sc-room0); }
+.fx-room--1 { fill: var(--sc-room1); }
+.fx-room--2 { fill: var(--sc-room2); }
+.fx-wall { fill: var(--sc-wall); }
+.fx-plinth { fill: var(--sc-plinth); }
+.fx-floor { fill: var(--sc-floor); }
+.fx-furn { fill: var(--sc-furn); }
+.fx-furn-line { stroke: var(--sc-top); stroke-width: 0.8; }
+.fx-top { fill: var(--sc-top); }
+.fx-stand { fill: none; stroke: var(--sc-dark); stroke-width: 2.4; stroke-linecap: round; }
+.fx-tank { fill: var(--sc-tank); }
+.fx-tank-rib { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1.4; }
+.fx-white { fill: var(--sc-white); stroke: var(--sc-line); stroke-width: 0.6; }
+.fx-line { fill: var(--sc-line); }
+.fx-dark { fill: var(--sc-dark); }
+.fx-screen { fill: var(--sc-screen); }
+.fx-metal { fill: var(--sc-metal); }
+.fx-batt { fill: var(--sc-box); }
+.fx-pump { fill: var(--sc-pump); }
+.fx-cord { stroke: var(--sc-dark); stroke-width: 0.8; }
+.fx-bulb { fill: var(--sc-bulb); }
+.fx-handle { fill: none; stroke: var(--sc-dark); stroke-width: 1.3; stroke-linecap: round; }
+.fx-legs { fill: none; stroke: var(--sc-top); stroke-width: 1.5; stroke-linecap: round; }
+.fx-frost { fill: none; stroke: #7FB6D8; stroke-width: 0.9; stroke-linecap: round; }
+.fx-glow { fill: #8FC3E0; opacity: 0.85; }
+.fx-led { fill: var(--sc-cell); }
+.fx-pipe { fill: none; stroke: var(--sc-dark); stroke-width: 2.6; stroke-linecap: round; }
+.fx-dark-room { fill: #000; opacity: calc(var(--night) * var(--k)); pointer-events: none; }
+.fx-light { opacity: var(--night); }
+.fx-bulb-top { opacity: var(--night); }
+.fx-tag rect { fill: var(--sun); }
+.fx-tag text { fill: #fff; font: 700 7.5px var(--body); }
+
+/* what each thing does while it runs */
+.fx-blade { fill: var(--sc-dark); transform-box: fill-box; transform-origin: 50% 50%; animation: blade 0.5s linear infinite; }
+.fx-blade--b { animation-delay: -0.125s; opacity: 0.7; }
+@keyframes blade { 0%, 100% { transform: scaleX(1); } 25% { transform: scaleX(0.08); } 50% { transform: scaleX(-1); } 75% { transform: scaleX(-0.08); } }
+.fx-picture { fill: #3B7FA6; animation: picture 6s ease-in-out infinite; }
+@keyframes picture { 30% { fill: #4F9C86; } 60% { fill: #5C6FB0; } 85% { fill: #7A5FA0; } }
+.fx-blink { animation: blink 1.1s steps(2, jump-none) infinite; }
+.fx-blink--b { animation-delay: -0.4s; } .fx-blink--c { animation-delay: -0.8s; }
+@keyframes blink { 50% { opacity: 0.2; } }
+.fx-air path { fill: none; stroke: #8EC6E6; stroke-width: 1.1; stroke-linecap: round; stroke-dasharray: 3 5; opacity: 0.8; animation: air 1.2s linear infinite; }
+@keyframes air { to { stroke-dashoffset: -8; } }
+.fx-cone { transform-box: fill-box; transform-origin: 50% 50%; animation: cone 0.45s ease-in-out infinite alternate; }
+.fx-cone--b { animation-delay: -0.2s; }
+@keyframes cone { to { transform: scale(1.18); } }
+.fx-drum { fill: none; stroke: var(--sc-metal); stroke-width: 1.6; stroke-dasharray: 3 2.8; transform-box: fill-box; transform-origin: 50% 50%; animation: drum 1.3s linear infinite; }
+@keyframes drum { to { transform: rotate(360deg); } }
+.fx-steam { fill: none; stroke: var(--sc-steam); stroke-width: 1; stroke-linecap: round; animation: steam 2.4s ease-out infinite; }
+@keyframes steam { 0% { transform: translateY(2px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-5px); opacity: 0; } }
+.fx-water { fill: none; stroke: #5BA4E0; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 2 4; animation: flow 600ms linear infinite; }
+
+/* a new thing lands in its room as the flying icon arrives */
+.fx-in { transform-box: fill-box; transform-origin: 50% 100%; animation: land 560ms var(--spring) backwards; animation-delay: var(--land, 0ms); }
+.fx-item--bulb .fx-in, .fx-item--fan .fx-in, .fx-item--ac .fx-in { transform-origin: 50% 0; }
+@keyframes land { from { transform: translateY(-8px) scale(0.4); opacity: 0; } 30% { opacity: 1; } }
+
+/* the battery, and power moving */
+.fh-slot { fill: var(--sc-slot); }
+.fh-lvl { fill: var(--sc-cell); transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--lvl)); transition: fill 300ms; }
+.fh[data-low] .fh-lvl { fill: #E76F51; }
+.fh-cable { fill: none; stroke: var(--sc-dark); stroke-width: 1.6; }
+.fh-flow { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1.5 6; animation: flow 700ms linear infinite; }
+.fh-flow--sun { stroke: var(--sc-win); opacity: calc(var(--sunk) * var(--has)); }
+.fh-flow--night { stroke: var(--sc-cell); opacity: calc(var(--night) * var(--has)); }
+@keyframes flow { to { stroke-dashoffset: -7.5; } }
+.fh-cap { display: flex; gap: 0.6rem; align-items: baseline; min-height: 2.6em; margin-top: 0.7rem; font-size: 0.88rem; color: var(--muted); line-height: 1.35; }
+.fh-cap b { flex: none; min-width: 3.3em; color: var(--cream); font-variant-numeric: tabular-nums; }
+.fh-cap b:empty { display: none; }
+
+.fa-body { padding-top: 1.4rem; }
+.fa-label { font-size: 0.9rem; color: var(--muted); }
+.fa-move { display: inline-flex; align-items: center; gap: 0.2rem; margin-left: 0.6rem; padding: 0.05rem 0.5rem 0.05rem 0.35rem; border-radius: 99px; font-size: 0.78rem; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 13%, transparent); animation: moved 3s var(--ease) forwards; }
+@keyframes moved { 0% { opacity: 0; transform: translateX(-6px); } 10%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.fa-name { font-size: clamp(2.2rem, 4vw, 3rem); color: var(--sun); margin-top: 0.15rem; animation: rise 380ms var(--ease); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+.fa-spec { color: var(--muted); font-size: 0.95rem; margin-top: 0.4rem; }
+.fa-price { margin-top: 1rem; color: var(--muted); font-size: 0.95rem; }
+.fa-price strong { font-family: var(--display); font-size: 1.7rem; color: var(--cream); letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; }
+.fa-why { margin-top: 0.9rem; }
+.fa-why--beyond { color: var(--leaf); }
+.fa-use { margin-top: 0.3rem; font-size: 0.88rem; color: var(--muted); }
+
+/* the five packages on one line, a dot at yours */
+.fa-scale { position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); margin-top: 1.5rem; padding-top: 1.3rem; }
+.fa-scale::before { content: ''; position: absolute; left: calc(50% / var(--n)); right: calc(50% / var(--n)); top: 6px; height: 2px; background: var(--line-2); }
+.fa-scale-dot { position: absolute; top: 0; left: calc((var(--i) + 0.5) * 100% / var(--n)); width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 5px color-mix(in srgb, var(--sun) 22%, transparent); transition: left 520ms var(--ease); z-index: 1; }
+.fa-tick { position: relative; text-align: center; font-size: 0.72rem; color: var(--muted); white-space: nowrap; transition: color 300ms; }
+.fa-tick::before { content: ''; position: absolute; left: 50%; top: -1rem; width: 2px; height: 8px; margin-left: -1px; background: var(--line-2); }
+.fa-tick.on { color: var(--cream); font-weight: 700; }
+.fa-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.4rem; margin-top: 1.4rem; }
+.fa-link { padding: 0; color: var(--cream); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-2); }
+.fa-link:hover { text-decoration-color: var(--cream); }
+.fa-note { margin-top: 1.2rem; font-size: 0.82rem; color: var(--muted); }
+.find-dock, .find-top { display: none; }
+
+@media (max-width: 860px) {
+  .find { padding-bottom: 7rem; }
+  .find-grid { grid-template-columns: minmax(0, 1fr); }
+  .find-answer { display: none; }
+  /* phone: keep the heading short so the house and the first rows of the list fit on the first screen */
+  .find { padding-top: 1.1rem; }
+  .find-list h1 { font-size: clamp(1.75rem, 7.4vw, 2.3rem); line-height: 1.05; }
+  .find-lede { margin-top: 0.45rem; font-size: 0.95rem; line-height: 1.4; }
+  .find-top { display: block; margin-top: 0.9rem; }
+  .find-top .fh-cap { min-height: 0; margin-top: 0.45rem; font-size: 0.82rem; }
+  .fl-room { margin-top: 1.5rem; }
+  .find-top + .fl-room { margin-top: 1rem; }
+  .find-top .fh { max-width: 420px; }
+  .fh-scene--mini { flex: none; width: 54px; }
+  .fh-scene--mini .fh { border-radius: 8px; }
+  .find-dock.open .fh-scene--mini { display: none; }
+  .find-dock { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--ink-2); border-top: 1px solid var(--line-2); border-radius: 20px 20px 0 0; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.22); padding-bottom: env(safe-area-inset-bottom); }
+  .find-dock-bar { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 16px; text-align: left; }
+  .find-dock-name { display: grid; flex: 1; min-width: 0; line-height: 1.15; }
+  .find-dock-name .fa-move { justify-self: start; margin: 0; white-space: nowrap; }
+  .find-dock-name small { display: grid; }
+  .find-dock-bar small { font-size: 0.75rem; color: var(--muted); }
+  .find-dock-bar b { font-family: var(--display); font-size: 1.2rem; color: var(--sun); animation: rise 380ms var(--ease); }
+  .find-dock-price { flex: none; font-family: var(--display); font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  .find-dock-price small { font-family: var(--body); font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+  .find-dock-chev { color: var(--muted); transition: transform 300ms var(--ease); }
+  .find-dock.open .find-dock-chev { transform: rotate(180deg); }
+  .find-dock-sheet { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 360ms var(--ease); }
+  .find-dock.open .find-dock-sheet { grid-template-rows: 1fr; }
+  .find-dock-sheet > div { min-height: 0; overflow: hidden; padding: 0 20px; max-height: calc(100vh - 140px); overflow-y: auto; }
+  .find-dock.open .find-dock-sheet > div { padding-bottom: 1.2rem; }
+  .find-dock .fh { max-width: 260px; margin: 0.2rem auto 0; }
+  .find-dock .fa-body { padding-top: 0.6rem; }
+  .find-dock .fa-label, .find-dock .fa-name, .find-dock .fa-spec, .find-dock .fa-price { display: none; }
+  .find-dock .fa-why { margin-top: 0; }
+}
+@media (max-width: 400px) {
+  .find-dock-bar { gap: 0.6rem; }
+  .find-dock-bar b { font-size: 1.1rem; }
+  .fh-scene--mini { width: 46px; }
+}
+@media (max-width: 560px) {
+  .fl-room li { gap: 0.6rem; }
+  .fl-w { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .find *, .find *::before, .find *::after { animation: none !important; transition: none !important; }
+}
+.chip-undo { text-decoration: underline; text-underline-offset: 2px; color: var(--muted); font-size: inherit; }

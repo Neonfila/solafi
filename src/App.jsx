@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import About from './pages/About.jsx'
 import Sign from './pages/Sign.jsx'
+import Build from './pages/Build.jsx'
 import ColourReview, { showColourReview } from './components/ColourReview.jsx'
 
 // Scroll to the #section in the URL after a route change, or to the top.
@@ -38,6 +39,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/build" element={<Build />} />
           <Route path="/sign" element={<SignRoute />} />
           <Route path="*" element={<Home />} />
         </Routes>

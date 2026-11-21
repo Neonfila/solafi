@@ -64,7 +64,8 @@ export default function Calculator({ onEstimate }) {
   const [servicing, setServicing] = useState(d.genServicing)
 
   const products = useProducts()
-  const [pkgId, setPkgId] = useState(null)
+  // "See my savings" on /build arrives with ?pkg=<id> and starts on that package
+  const [pkgId, setPkgId] = useState(() => new URLSearchParams(window.location.search).get('pkg'))
   const [coverage, setCoverage] = useState(d.coveragePct)
   const [showTerms, setShowTerms] = useState(false)
 
