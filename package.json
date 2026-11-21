@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp dist/index.html dist/404.html && node tools/build-sign-page.mjs",
+    "build": "vite build && cp dist/index.html dist/404.html && mkdir -p dist/build && cp dist/index.html dist/build/index.html && node tools/build-sign-page.mjs",
     "preview": "vite preview",
     "test": "node --test src/lib/calc.test.js src/lib/agreement.test.js src/lib/products.test.js src/lib/finder.test.js"
   },
