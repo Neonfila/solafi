@@ -754,7 +754,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .fa-link { padding: 0; color: var(--cream); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-2); }
 .fa-link:hover { text-decoration-color: var(--cream); }
 .fa-note { margin-top: 1.2rem; font-size: 0.82rem; color: var(--muted); }
-.find-dock, .find-top { display: none; }
+.find-dock, .find-top, .find-top-mark { display: none; }
 
 @media (max-width: 860px) {
   .find { padding-bottom: 7rem; }
@@ -764,7 +764,15 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
   .find { padding-top: 1.1rem; }
   .find-list h1 { font-size: clamp(1.75rem, 7.4vw, 2.3rem); line-height: 1.05; }
   .find-lede { margin-top: 0.45rem; font-size: 0.95rem; line-height: 1.4; }
-  .find-top { display: block; margin-top: 0.9rem; }
+  /* the house stays under the header while the list scrolls beneath it */
+  .find-top-mark { display: block; height: 0.9rem; }
+  .find-top {
+    display: block; position: sticky; top: 69px; z-index: 5; padding-bottom: 0.6rem;
+    background: var(--ink); box-shadow: 0 0 0 100vmax var(--ink); clip-path: inset(0 -100vmax -1px);
+  }
+  .find-top.stuck { box-shadow: 0 0 0 100vmax var(--ink), 0 1px 0 100vmax var(--line-2); }
+  /* things scrolled into view (keyboard focus, links) land below the house, not behind it */
+  html:has(.find-top) { scroll-padding-top: calc(69px + min(420px, 100vw - 40px) * 0.68 + 3.2rem); }
   .find-top .fh-cap { min-height: 0; margin-top: 0.45rem; font-size: 0.82rem; }
   .fl-room { margin-top: 1.5rem; }
   .find-top + .fl-room { margin-top: 1rem; }

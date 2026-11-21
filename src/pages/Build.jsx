@@ -83,6 +83,15 @@ export default function Build() {
   const [open, setOpen] = useState(false)
   const [bump, setBump] = useState(null) // the row just added to, so it can flash
   const [move, setMove] = useState(null) // "Up from Prime", for a moment
+  const [stuck, setStuck] = useState(false) // phone: the house has reached the header and stays there
+  const mark = useRef(null)
+  useEffect(() => {
+    const el = mark.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 80), { rootMargin: '-69px 0px 0px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const t = document.title
@@ -178,7 +187,8 @@ export default function Build() {
           <h1>What do you want to power?</h1>
           <p className="find-lede">Add what you use at home or in your shop. We show the smallest package that runs it.</p>
           {/* phone: the house sits here, at the top of the list */}
-          <div className="find-top">
+          <div className="find-top-mark" ref={mark} aria-hidden="true" />
+          <div className={`find-top${stuck ? ' stuck' : ''}`}>
             <FindHouse sel={sel} panels={panels} drain={drain} />
           </div>
 
