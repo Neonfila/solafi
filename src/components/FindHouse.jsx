@@ -176,6 +176,8 @@ const DRAW = {
   speaker: SpeakerDraw, fridge: Fridge, microwave: MicrowaveDraw, kettle: KettleDraw, freezer: Freezer,
   washer: Washer, iron: IronBoard, pump: Pump,
 }
+// things standing on the floor get a soft shadow under them: [width, height]
+const FLOOR = { fridge: [24, 60], freezer: [18, 32], washer: [28, 30], speaker: [10, 34], pump: [20, 12] }
 // where the "+2" tag sits on each kind, from the spot's top-left
 const TAG = { bulb: [-22, 10], fan: [14, 2], ac: [36, -2], tv: [40, -2], speaker: [9, -2], fridge: [22, -2], washer: [26, -2] }
 
@@ -190,6 +192,8 @@ const RIBS = Array.from({ length: 40 }, (_, i) => 16 + i * 8).filter((x) => x < 
   const top = x < 78 ? 124 - ((x - 12) * 58) / 66 : x > 270 ? 124 - ((336 - x) * 58) / 66 : 66
   return [x, top]
 })
+// step-tile rows across the sheets, every 8.5 down from the ridge
+const STEPS = Array.from({ length: 6 }, (_, i) => 74.5 + i * 8.5).map((y) => [y, ROOF_X(y) + 1, 348 - ROOF_X(y) - 1])
 const STARS = [[24, 20], [52, 48], [104, 26], [140, 12], [214, 16], [250, 40], [300, 22], [372, 30], [396, 70], [338, 56], [18, 92]]
 
 // ── A day and a night ─────────────────────────────────────────────────────────
@@ -285,7 +289,10 @@ export default function FindHouse({ sel, panels, drain, mini = false }) {
     spots.slice(0, n).forEach(([x, y], i) => {
       items.push(
         <g key={`${kind}-${i}`} data-slot={`${kind}-${i}`} transform={`translate(${x} ${y})`} className={`fx-item fx-item--${kind}`}>
-          <g className="fx-in"><Draw /></g>
+          <g className="fx-in">
+            {FLOOR[kind] && <ellipse cx={FLOOR[kind][0] / 2} cy={FLOOR[kind][1] - 0.5} rx={FLOOR[kind][0] * 0.6} ry="1.8" className="fx-contact" />}
+            <Draw />
+          </g>
         </g>
       )
     })
@@ -324,6 +331,25 @@ export default function FindHouse({ sel, panels, drain, mini = false }) {
             <stop offset="0" stopColor="var(--sc-win)" stopOpacity="0.55" />
             <stop offset="1" stopColor="var(--sc-win)" stopOpacity="0" />
           </radialGradient>
+          <linearGradient id={`roofshade${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.14" />
+            <stop offset="0.55" stopColor="#fff" stopOpacity="0" />
+            <stop offset="1" stopColor="#000" stopOpacity="0.16" />
+          </linearGradient>
+          <linearGradient id={`sheen${uid}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#fff" stopOpacity="0" />
+            <stop offset="0.28" stopColor="#fff" stopOpacity="0.16" />
+            <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+            <stop offset="1" stopColor="#000" stopOpacity="0.22" />
+          </linearGradient>
+          <linearGradient id={`ceil${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
+            <stop offset="1" stopColor="#000" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id={`corner${uid}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#000" stopOpacity="0.1" />
+            <stop offset="1" stopColor="#000" stopOpacity="0" />
+          </linearGradient>
         </defs>
 
         {/* sky */}
@@ -337,25 +363,58 @@ export default function FindHouse({ sel, panels, drain, mini = false }) {
 
         {/* roof */}
         <path d="M12 124 L78 66 L270 66 L336 124 Z" className="fx-roof" />
-        {RIBS.map(([x, top]) => <line key={x} x1={x} y1={top + 1} x2={x} y2="123" className="fx-rib" />)}
-        <rect x="8" y="122" width="332" height="5" rx="1" className="fx-fascia" />
+        {RIBS.map(([x, top]) => (
+          <g key={x}>
+            <line x1={x} y1={top + 1.5} x2={x} y2="123" className="fx-rib" />
+            <line x1={x + 1.2} y1={top + 1.5} x2={x + 1.2} y2="123" className="fx-rib-hi" />
+          </g>
+        ))}
+        {STEPS.map(([y, x1, x2]) => (
+          <g key={y}>
+            <line x1={x1} y1={y} x2={x2} y2={y} className="fx-step" />
+            <line x1={x1 + 0.6} y1={y + 1.3} x2={x2 - 0.6} y2={y + 1.3} className="fx-step-hi" />
+          </g>
+        ))}
+        <path d="M12 124 L78 66 L270 66 L336 124 Z" fill={`url(#roofshade${uid})`} />
+        {/* hip edges catch the light on the left, fall into shade on the right */}
+        <path d="M12.5 123.5 L78.5 66" className="fx-hip-hi" />
+        <path d="M335.5 123.5 L269.5 66" className="fx-hip-lo" />
+        <rect x="74" y="62.5" width="200" height="5" rx="2.5" className="fx-ridge" />
+        <rect x="74" y="62.5" width="200" height="1.6" rx="0.8" className="fx-ridge-hi" />
+        <rect x="10" y="126.5" width="328" height="3.5" className="fx-soffit" />
+        <rect x="8" y="121" width="332" height="6" rx="1.2" className="fx-fascia" />
+        <rect x="8" y="121" width="332" height="1.4" rx="0.7" className="fx-fascia-hi" />
         {SPOTS.map((p, i) => (
           <g key={i} transform={`translate(${p.x} ${p.y})`}>
+            {i < panels && <rect x="-0.5" y="12.4" width="23" height="1.6" rx="0.8" className="fx-pv-rail" style={{ '--i': i }} />}
             <rect width="22" height="13" rx="1.2" className={`fx-pv${i < panels ? ' on' : ''}`} style={{ '--i': i }} />
-            {i < panels && <path d="M11 0.6 V12.4 M0.6 6.5 H21.4" className="fx-pv-grid" style={{ '--i': i }} />}
+            {i < panels && (
+              <g className="fx-pv-face" style={{ '--i': i }}>
+                <path d="M7.3 1 V12 M14.7 1 V12 M1 6.5 H21" className="fx-pv-grid" />
+                <path d="M1 1 H10 L4 12 H1 Z" className="fx-pv-glare" />
+                <rect x="0.4" y="0.4" width="21.2" height="12.2" rx="1" className="fx-pv-frame" />
+              </g>
+            )}
           </g>
         ))}
 
         {/* ground, tank on its stand */}
         <rect y="240" width="400" height="32" className="fh-ground" />
         <path d="M344 186 L340 240 M386 186 L390 240 M342 212 H388" className="fx-stand" />
+        <ellipse cx="365" cy="240.5" rx="30" ry="2.4" className="fx-contact" />
         <rect x="338" y="146" width="54" height="42" rx="9" className="fx-tank" />
         <rect x="358" y="141" width="14" height="6" rx="2" className="fx-tank" />
         <path d="M341 158 H389 M341 176 H389" className="fx-tank-rib" />
+        <rect x="338" y="146" width="54" height="42" rx="9" fill={`url(#sheen${uid})`} />
 
         {/* the house: back walls, floor, walls, ceiling */}
         {rooms.map(([x, w], i) => <rect key={i} x={x} y="132" width={w} height="108" className={`fx-room fx-room--${i}`} />)}
         {rooms.map(([x, w], i) => <rect key={i} x={x} y="236" width={w} height="4" className="fx-floor" />)}
+        {rooms.map(([x, w], i) => <rect key={i} x={x} y="132" width={w} height="16" fill={`url(#ceil${uid})`} />)}
+        {rooms.map(([x], i) => <rect key={i} x={x} y="132" width="8" height="104" fill={`url(#corner${uid})`} />)}
+        <ellipse cx="82" cy="238.5" rx="38" ry="2" className="fx-contact" />
+        <ellipse cx="185" cy="238.5" rx="22" ry="2" className="fx-contact" />
+        <ellipse cx="306.5" cy="238.5" rx="10" ry="1.8" className="fx-contact" />
         <path d="M24 132 h6 v108 h-6 Z M132 132 h4 v108 h-4 Z M226 132 h4 v108 h-4 Z M318 132 h6 v108 h-6 Z" className="fx-wall" />
         <rect x="24" y="127" width="300" height="5" className="fx-wall" />
         <rect x="20" y="240" width="308" height="5" className="fx-plinth" />

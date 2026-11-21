@@ -579,7 +579,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .find {
   --sc-sky: #16372B; --sc-night: #040A07; --sc-win: #E9C46A; --sc-ground: #06100C; --sc-panel: #24448A; --sc-cell: #7CF29A;
   --sc-slot: rgba(244, 241, 232, 0.07); --sc-box: #22392F;
-  --sc-roof: #2B5444; --sc-rib: rgba(0, 0, 0, 0.25); --sc-fascia: #1E3D31; --sc-wall: #0E1D17; --sc-plinth: #091410;
+  --sc-roof: #6A3427; --sc-rib: rgba(0, 0, 0, 0.22); --sc-fascia: #4A2219; --sc-wall: #0E1D17; --sc-plinth: #091410;
   --sc-room0: #2A4337; --sc-room1: #263F3A; --sc-room2: #283B3C; --sc-floor: #3B3427;
   --sc-furn: #6B5A40; --sc-top: #57492F; --sc-white: #D9DFDA; --sc-line: rgba(0, 0, 0, 0.25); --sc-dark: #1A2420;
   --sc-screen: #0A1310; --sc-metal: #8C9592; --sc-tank: #050807; --sc-pump: #3A68A0; --sc-bulb: #FFE7A3; --sc-steam: rgba(255, 255, 255, 0.45);
@@ -590,7 +590,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 :root[data-theme='light'] .find {
   --sc-sky: #E7DFCC; --sc-night: #27363F; --sc-win: #F4C24F; --sc-ground: #6E6654; --sc-panel: #1F3B78; --sc-cell: #2BB673;
   --sc-slot: rgba(255, 255, 255, 0.18); --sc-box: #6B634F;
-  --sc-roof: #2F5E4B; --sc-rib: rgba(0, 0, 0, 0.14); --sc-fascia: #24493A; --sc-wall: #5E5747; --sc-plinth: #4B4538;
+  --sc-roof: #8A4130; --sc-rib: rgba(0, 0, 0, 0.13); --sc-fascia: #62291D; --sc-wall: #5E5747; --sc-plinth: #4B4538;
   --sc-room0: #F2E6CC; --sc-room1: #E4EBDC; --sc-room2: #E2E6E6; --sc-floor: #B79F7A;
   --sc-furn: #A98A63; --sc-top: #8C7152; --sc-white: #FBFAF6; --sc-line: rgba(0, 0, 0, 0.12); --sc-dark: #3D4643;
   --sc-screen: #1D2A30; --sc-metal: #A9B0AD; --sc-tank: #22272A; --sc-pump: #3E6FA6; --sc-bulb: #FFE7A3; --sc-steam: rgba(90, 90, 90, 0.4);
@@ -638,12 +638,26 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 
 /* the house, front wall off */
 .fx-roof { fill: var(--sc-roof); }
-.fx-rib { stroke: var(--sc-rib); stroke-width: 1; }
+.fx-rib { stroke: var(--sc-rib); stroke-width: 0.9; }
+.fx-rib-hi { stroke: rgba(255, 255, 255, 0.07); stroke-width: 0.7; }
+.fx-hip-hi { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1.4; stroke-linecap: round; }
+.fx-hip-lo { stroke: rgba(0, 0, 0, 0.22); stroke-width: 1.4; stroke-linecap: round; }
+.fx-ridge { fill: var(--sc-fascia); }
+.fx-step { stroke: rgba(0, 0, 0, 0.26); stroke-width: 1.3; }
+.fx-step-hi { stroke: rgba(255, 255, 255, 0.1); stroke-width: 0.8; }
+.fx-ridge-hi { fill: rgba(255, 255, 255, 0.18); }
+.fx-soffit { fill: rgba(0, 0, 0, 0.35); }
+.fx-fascia-hi { fill: rgba(255, 255, 255, 0.16); }
+.fx-contact { fill: #000; opacity: 0.16; }
+.fx-pv-rail { fill: var(--sc-dark); opacity: 0.7; }
+.fx-pv-frame { fill: none; stroke: rgba(225, 232, 240, 0.55); stroke-width: 0.8; }
+.fx-pv-glare { fill: #fff; opacity: 0.1; }
+.fx-pv-face, .fx-pv-rail { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
 .fx-fascia { fill: var(--sc-fascia); }
 .fx-pv { fill: var(--sc-slot); transition: fill 300ms ease-out; }
 .fx-pv.on { fill: var(--sc-panel); }
-.fx-pv-grid { fill: none; stroke: rgba(255, 255, 255, 0.22); stroke-width: 0.7; }
-.fx-pv.on, .fx-pv-grid { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
+.fx-pv-grid { fill: none; stroke: rgba(255, 255, 255, 0.2); stroke-width: 0.5; }
+.fx-pv.on { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 480ms var(--ease) backwards; animation-delay: calc(max(0, var(--i) - var(--from)) * 60ms); }
 @keyframes drop { from { transform: translateY(-16px) scaleY(0.6); opacity: 0; } 70% { transform: translateY(1px); opacity: 1; } }
 .fx-room--0 { fill: var(--sc-room0); }
 .fx-room--1 { fill: var(--sc-room1); }
